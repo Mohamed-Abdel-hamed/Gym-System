@@ -1,6 +1,6 @@
 ﻿using Gym.Api.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
 
 namespace Gym.Api;
 
@@ -8,7 +8,8 @@ public static class ConfigurationService
 {
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContextConfig(configuration);
+        services.AddDbContextConfig(configuration)
+            .AddIdentityConfig();
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)
@@ -20,6 +21,15 @@ public static class ConfigurationService
         services.AddDbContext<ApplicationDbContext>(options =>
 
         options.UseSqlServer(connectionString));
+        return services;
+    }
+    public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
+    {
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.User.RequireUniqueEmail = true;
+        });
         return services;
     }
 }
