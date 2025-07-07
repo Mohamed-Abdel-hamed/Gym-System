@@ -1,4 +1,5 @@
-﻿using Gym.Api.Persistence;
+﻿using Gym.Api.Entities;
+using Gym.Api.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,8 @@ public static class ConfigurationService
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
     {
+        services.AddIdentity<ApplicationUser,IdentityRole>()
+             .AddEntityFrameworkStores<ApplicationDbContext>();
         services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequiredLength = 8;

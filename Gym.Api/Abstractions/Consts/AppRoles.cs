@@ -1,4 +1,4 @@
-﻿namespace Gym.Api.Consts;
+﻿namespace Gym.Api.Abstractions.Consts;
 
 public static class AppRoles
 {

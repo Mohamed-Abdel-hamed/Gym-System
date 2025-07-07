@@ -1,4 +1,4 @@
-﻿using Gym.Api.Consts;
+﻿using Gym.Api.Abstractions.Consts;
 using Gym.Api.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,7 +11,7 @@ public static class DefaultUser
             ApplicationUser admin = new()
             {
                 UserName = "admin",
-                Email = "admin@bookify.com",
+                Email = "admin@gym.com",
                 FirstName = "Admin",
                 LastName="admin",
                 EmailConfirmed = true

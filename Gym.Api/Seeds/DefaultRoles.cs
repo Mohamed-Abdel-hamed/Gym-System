@@ -1,4 +1,4 @@
-﻿using Gym.Api.Consts;
+﻿using Gym.Api.Abstractions.Consts;
 using Microsoft.AspNetCore.Identity;
 
 namespace Gym.Api.Seeds;
