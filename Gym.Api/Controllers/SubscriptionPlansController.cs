@@ -10,9 +10,10 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     private readonly ISubscriptionPlanService _planService = planService;
 
     [HttpGet("")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellation)
     {
-       var result= await _planService.GetAllAsync();
+       var result= await _planService.GetAllAsync(cancellation);
         return result.IsSuccess? Ok(result.Value):result.ToProblem(StatusCodes.Status404NotFound, "Not Found");
+
     }
 }
