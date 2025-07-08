@@ -46,11 +46,13 @@ public static class ConfigurationService
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
     {
         services.AddIdentity<ApplicationUser,IdentityRole>()
-             .AddEntityFrameworkStores<ApplicationDbContext>();
+             .AddEntityFrameworkStores<ApplicationDbContext>()
+              .AddDefaultTokenProviders();
         services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequiredLength = 8;
             options.User.RequireUniqueEmail = true;
+            options.SignIn.RequireConfirmedEmail = true;
         });
         return services;
     }
