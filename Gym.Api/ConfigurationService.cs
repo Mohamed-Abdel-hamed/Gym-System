@@ -1,4 +1,5 @@
 ﻿using Gym.Api.Entities;
+using Gym.Api.Errors;
 using Gym.Api.Persistence;
 using Gym.Api.Services.SubscriptionPlans;
 using Mapster;
@@ -17,6 +18,11 @@ public static class ConfigurationService
             .AddIdentityConfig()
             .AddServicesConfig()
             .AddMapsterConfig();
+
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        services.AddProblemDetails();
+
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)

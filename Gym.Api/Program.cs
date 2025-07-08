@@ -30,5 +30,6 @@ await DefaultUser.SeedAdminUserAsync(userManger);
 
 
 app.MapControllers();
+app.UseExceptionHandler();
 
 app.Run();
