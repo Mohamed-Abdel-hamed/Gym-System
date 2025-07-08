@@ -1,6 +1,8 @@
-﻿using Gym.Api.Contracts.SubscriptionPlans;
+﻿using Gym.Api.Abstractions;
+using Gym.Api.Contracts.SubscriptionPlans;
 using Gym.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Gym.Api.Services.SubscriptionPlans;
@@ -9,7 +11,7 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<IEnumerable<SubscriptionPlanResponse>> GetAllAsync(CancellationToken cancellation = default)
+    public async Task<Result<IEnumerable<SubscriptionPlanResponse>>> GetAllAsync(CancellationToken cancellation = default)
     {
        var subscriptionPlans = await _context.SubscriptionPlans
             .AsNoTracking()
@@ -26,7 +28,7 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
             .ToListAsync(cancellation);
         if(subscriptionPlans.Count==0)
 
-            return [];
-        return subscriptionPlans;
+            return Result.Failure<IEnumerable<SubscriptionPlanResponse >> (new Error("SubscriptionPlans.NotFound", "Not found any SubscriptionPlans"));
+        return Result.Success<IEnumerable<SubscriptionPlanResponse>>(subscriptionPlans);
     }
 }

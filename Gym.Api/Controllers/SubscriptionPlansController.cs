@@ -11,6 +11,7 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     [HttpGet("")]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _planService.GetAllAsync());
+       var result= await _planService.GetAllAsync();
+        return result.IsSuccess? Ok(result.Value):BadRequest(result.Error);
     }
 }
