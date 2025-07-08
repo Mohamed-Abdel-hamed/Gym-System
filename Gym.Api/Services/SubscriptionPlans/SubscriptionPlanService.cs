@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Contracts.SubscriptionPlans;
+using Gym.Api.Errors;
 using Gym.Api.Persistence;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +18,9 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
             .ProjectToType<SubscriptionPlanResponse>()
             .ToListAsync(cancellation);
 
-        if(subscriptionPlans.Count==0)
+        if (subscriptionPlans.Count == 0)
 
-            return Result.Failure<IEnumerable<SubscriptionPlanResponse >> (new Error("SubscriptionPlans.NotFound", "Not found any SubscriptionPlans"));
-
+            return Result.Failure<IEnumerable<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
         return Result.Success<IEnumerable<SubscriptionPlanResponse>>(subscriptionPlans);
     }
 }
