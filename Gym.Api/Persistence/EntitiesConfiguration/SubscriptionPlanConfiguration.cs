@@ -8,6 +8,7 @@ public class SubscriptionPlanConfiguration : IEntityTypeConfiguration<Subscripti
 {
     public void Configure(EntityTypeBuilder<SubscriptionPlan> builder)
     {
-        builder.Property(x => x.Name).HasMaxLength(100);
+        builder.Property(x => x.Name).HasMaxLength(20);
+        builder.Property(x => x.Description).HasMaxLength(100);
     }
 }

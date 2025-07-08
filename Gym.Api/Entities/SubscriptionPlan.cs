@@ -4,14 +4,16 @@ public class SubscriptionPlan
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
+    public string Description { get; set; } = default!;
     public bool UnlimitedDailyEntries { get; set; }
+    public decimal Price { get; set; }
 
-    //  class‑booking limits
-    public int MaxClassBookingsPerDay { get; set; } = 1;
-    public int MaxClassBookingsInFuture { get; set; } = 3;
+    public int DurationInDays { get; set; }
 
-    // Freeze rules
-    public int MaxFreezesPerYear { get; set; } = 2;
-    public int MaxFreezeDays { get; set; } = 30;
+    public int MaxClassBookingsPerDay { get; set; }
+    public int MaxClassBookingsInFuture { get; set; }
+
+    public int MaxFreezesPerYear { get; set; }
+    public int MaxFreezeDays { get; set; }
 
 }
