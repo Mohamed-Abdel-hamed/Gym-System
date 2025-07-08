@@ -1,4 +1,5 @@
-﻿using Gym.Api.Services.SubscriptionPlans;
+﻿using Gym.Api.Abstractions;
+using Gym.Api.Services.SubscriptionPlans;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gym.Api.Controllers;
@@ -12,7 +13,6 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     public async Task<IActionResult> GetAll()
     {
        var result= await _planService.GetAllAsync();
-        return result.IsSuccess? Ok(result.Value):
-            Problem(statusCode:StatusCodes.Status404NotFound,title:result.Error.Code,detail:result.Error.Description);
+        return result.IsSuccess? Ok(result.Value):result.ToProblem(StatusCodes.Status404NotFound, "Not Found");
     }
 }
