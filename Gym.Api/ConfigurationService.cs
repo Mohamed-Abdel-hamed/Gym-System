@@ -1,6 +1,7 @@
 ﻿using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Persistence;
+using Gym.Api.Services.Auth;
 using Gym.Api.Services.SubscriptionPlans;
 using Mapster;
 using MapsterMapper;
@@ -39,6 +40,7 @@ public static class ConfigurationService
     private static IServiceCollection AddServicesConfig(this IServiceCollection services)
     {
         services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
+        services.AddScoped<IAuthService, AuthService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
