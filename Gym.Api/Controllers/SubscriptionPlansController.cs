@@ -13,7 +13,7 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     public async Task<IActionResult> GetAll(CancellationToken cancellation)
     {
        var result= await _planService.GetAllAsync(cancellation);
-        return result.IsSuccess? Ok(result.Value):result.ToProblem(StatusCodes.Status404NotFound, "Not Found");
+        return result.IsSuccess? Ok(result.Value):result.ToProblem();
 
     }
 }
