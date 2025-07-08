@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Entities;
 using Gym.Api.Persistence;
+using Gym.Api.Services.SubscriptionPlans;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ public static class ConfigurationService
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContextConfig(configuration)
-            .AddIdentityConfig();
+            .AddIdentityConfig()
+            .AddServicesConfig();
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)
@@ -22,6 +24,11 @@ public static class ConfigurationService
         services.AddDbContext<ApplicationDbContext>(options =>
 
         options.UseSqlServer(connectionString));
+        return services;
+    }
+    private static IServiceCollection AddServicesConfig(this IServiceCollection services)
+    {
+        services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
