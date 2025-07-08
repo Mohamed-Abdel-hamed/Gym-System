@@ -1,8 +1,11 @@
 ﻿using Gym.Api.Entities;
 using Gym.Api.Persistence;
 using Gym.Api.Services.SubscriptionPlans;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Gym.Api;
 
@@ -12,7 +15,8 @@ public static class ConfigurationService
     {
         services.AddDbContextConfig(configuration)
             .AddIdentityConfig()
-            .AddServicesConfig();
+            .AddServicesConfig()
+            .AddMapsterConfig();
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)
@@ -40,6 +44,13 @@ public static class ConfigurationService
             options.Password.RequiredLength = 8;
             options.User.RequireUniqueEmail = true;
         });
+        return services;
+    }
+    private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
+    {
+        var mappingConfig = TypeAdapterConfig.GlobalSettings;
+        mappingConfig.Scan(Assembly.GetExecutingAssembly());
+        services.AddSingleton<IMapper>(new Mapper(mappingConfig));
         return services;
     }
 }
