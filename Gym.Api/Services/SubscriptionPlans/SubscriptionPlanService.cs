@@ -1,9 +1,8 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Contracts.SubscriptionPlans;
 using Gym.Api.Persistence;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Gym.Api.Services.SubscriptionPlans;
 
@@ -15,20 +14,13 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
     {
        var subscriptionPlans = await _context.SubscriptionPlans
             .AsNoTracking()
-            .Select(x=>new SubscriptionPlanResponse
-            (
-                x.Name,
-                x.UnlimitedDailyEntries,
-                x.MaxClassBookingsPerDay,
-                x.MaxClassBookingsInFuture,
-                x.MaxFreezesPerYear,
-                x.MaxFreezeDays
-            )
-            )
+            .ProjectToType<SubscriptionPlanResponse>()
             .ToListAsync(cancellation);
+
         if(subscriptionPlans.Count==0)
 
             return Result.Failure<IEnumerable<SubscriptionPlanResponse >> (new Error("SubscriptionPlans.NotFound", "Not found any SubscriptionPlans"));
+
         return Result.Success<IEnumerable<SubscriptionPlanResponse>>(subscriptionPlans);
     }
 }
