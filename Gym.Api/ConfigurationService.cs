@@ -5,9 +5,13 @@ using Gym.Api.Services.Auth;
 using Gym.Api.Services.SubscriptionPlans;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Gym.Api.Authentications;
 
 namespace Gym.Api;
 
@@ -16,7 +20,7 @@ public static class ConfigurationService
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContextConfig(configuration)
-            .AddIdentityConfig()
+            .AddIdentityConfig(configuration)
             .AddServicesConfig()
             .AddMapsterConfig();
 
@@ -43,17 +47,49 @@ public static class ConfigurationService
         services.AddScoped<IAuthService, AuthService>();
         return services;
     }
-    public static IServiceCollection AddIdentityConfig(this IServiceCollection services)
+    public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<ApplicationUser,IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>()
               .AddDefaultTokenProviders();
+
+        services.AddSingleton<IJwtProvider, JwtProvider>();
+
+        //services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var jwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+
         services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequiredLength = 8;
             options.User.RequireUniqueEmail = true;
             options.SignIn.RequireConfirmedEmail = true;
         });
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"]
+                };
+            });
+
         return services;
     }
     private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
