@@ -26,7 +26,9 @@ public class AuthService(UserManager<ApplicationUser> userManager,ILogger<AuthSe
 
         if (phoneIsExists)
             return Result.Failure(UserErrors.DuplicatedPhoneNumber);
+
         ApplicationUser user=request.Adapt<ApplicationUser>();
+
        var result= await _userManager.CreateAsync(user,request.Password);
         if(result.Succeeded )
         {
@@ -65,5 +67,21 @@ public class AuthService(UserManager<ApplicationUser> userManager,ILogger<AuthSe
 
         var error = result.Errors.First();
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+    }
+    public async Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request)
+    {
+        if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
+            return Result.Success();
+
+        if (user.EmailConfirmed)
+            return Result.Failure(UserErrors.DuplicatedConfirmation);
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        _logger.LogInformation("Confirmation Token,{token}", token);
+        // send email
+
+        return Result.Success();
     }
 }
