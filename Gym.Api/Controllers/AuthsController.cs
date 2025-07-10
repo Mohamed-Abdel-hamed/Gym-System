@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Trainers;
 using Gym.Api.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,13 @@ public class AuthsController(IAuthService authService) : ControllerBase
         var result=await _authService.RegisterAsync(request,cancellation);
 
             return result.IsSuccess? Ok():result.ToProblem();
+    }
+    [HttpPost("register-trainer")]
+    public async Task<IActionResult> RegisterTrainer([FromBody] RegisterTrainerRequest request, CancellationToken cancellation)
+    {
+        var result = await _authService.RegisterTrainerAsync(request, cancellation);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
     }
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)

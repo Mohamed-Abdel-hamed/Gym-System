@@ -1,7 +1,9 @@
-﻿using Gym.Api.Abstractions;
+﻿using Azure.Core;
+using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
 using Gym.Api.Authentications;
 using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Trainers;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Helper;
@@ -19,7 +21,7 @@ public class AuthService(ApplicationDbContext context,
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider
-    ,ILogger<AuthService> logger,
+    , ILogger<AuthService> logger,
     IEmailSender emailSender,
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
@@ -33,14 +35,14 @@ public class AuthService(ApplicationDbContext context,
 
     public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellation = default)
     {
-        if(await _userManager.FindByEmailAsync(email) is not { } user)
+        if (await _userManager.FindByEmailAsync(email) is not { } user)
             return Result.Failure<AuthResponse>(UserErrors.UserNotFound);
 
-        var result = await _signInManager.PasswordSignInAsync(user, password,false,true);
+        var result = await _signInManager.PasswordSignInAsync(user, password, false, true);
 
-        if(result.Succeeded)
+        if (result.Succeeded)
         {
-            var(token,expiresIn)=_jwtProvider.GenerateToken(user);
+            var (token, expiresIn) = _jwtProvider.GenerateToken(user);
 
             var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn);
 
@@ -55,66 +57,80 @@ public class AuthService(ApplicationDbContext context,
         return Result.Failure<AuthResponse>(error);
 
     }
-    public async Task<Result> RegisterAsync(RegisterRequest request,CancellationToken cancellation=default)
+    public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellation = default)
     {
-        var emailIsExists = await _userManager.Users.AnyAsync(x=>x.Email==request.Email,cancellation);
+        var checkUserUniqueness= await CheckUserUniquenessAsync(request.Email, request.Password,cancellation);
 
-        if (emailIsExists)
-            return Result.Failure(UserErrors.DuplicatedEmail);
+        if (!checkUserUniqueness.IsSuccess)
 
-        var phoneIsExists = await _userManager.Users.AnyAsync(x => x.PhoneNumber == request.PhoneNumber, cancellation);
+            return checkUserUniqueness;
 
-        if (phoneIsExists)
-            return Result.Failure(UserErrors.DuplicatedPhoneNumber);
+        ApplicationUser user = request.Adapt<ApplicationUser>();
 
-        ApplicationUser user=request.Adapt<ApplicationUser>();
+        var result = await CreateUserAsync(user, request.Password, AppRoles.Trainer, cancellation);
 
-       var result= await _userManager.CreateAsync(user,request.Password);
-        if(result.Succeeded )
-        {
-            var token= await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            token=WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        if (!result.IsSuccess)
+            return result;
 
-            _logger.LogInformation("Confirmation Token,{token}",token);
-
-            await _userManager.AddToRoleAsync(user, AppRoles.Member);
-
-            await SendConfirmationEmail(user, token);
-
-            Member member = new()
+        Member member = new()
             {
-                UserId=user.Id
+                UserId = user.Id
             };
+
             _context.Members.Add(member);
             _context.SaveChanges();
-            return Result.Success();
-        }
-        var error=result.Errors.First();
-        return Result.Failure(new Error(error.Code, error.Description,StatusCodes.Status400BadRequest));
+
+        return Result.Success();
     }
+    public async Task<Result> RegisterTrainerAsync(RegisterTrainerRequest request, CancellationToken cancellation = default)
+    {
+        var checkUserUniqueness = await CheckUserUniquenessAsync(request.Info.Email, request.Info.Password, cancellation);
+
+        if (!checkUserUniqueness.IsSuccess)
+
+            return checkUserUniqueness;
+
+        ApplicationUser user = request.Info.Adapt<ApplicationUser>();
+
+        var result = await CreateUserAsync(user, request.Info.Password, AppRoles.Trainer, cancellation);
+
+        if (!result.IsSuccess)
+            return result;
+
+        Trainer trainer = new()
+        {
+            HireDate = request.HireDate,
+            UserId = user.Id
+        };
+
+        _context.Trainers.Add(trainer);
+        _context.SaveChanges();
+        return Result.Success();
+    }
+
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
-        if(await _userManager.FindByIdAsync(request.UserId) is not { }user)
+        if (await _userManager.FindByIdAsync(request.UserId) is not { } user)
             return Result.Failure(UserErrors.InvalidCode);
 
-        if(user.EmailConfirmed)
+        if (user.EmailConfirmed)
             return Result.Failure(UserErrors.DuplicatedConfirmation);
 
         var token = request.Token;
 
         try
         {
-            token=Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
         }
         catch (FormatException)
         {
             return Result.Failure(UserErrors.InvalidCode);
         }
 
-        var result=await _userManager.ConfirmEmailAsync(user,token);
+        var result = await _userManager.ConfirmEmailAsync(user, token);
 
-        if(result.Succeeded ) 
-           return Result.Success();
+        if (result.Succeeded)
+            return Result.Success();
 
         var error = result.Errors.First();
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
@@ -149,5 +165,36 @@ public class AuthService(ApplicationDbContext context,
         );
         await _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody);
         await Task.CompletedTask;
+    }
+
+
+    private async Task<Result> CheckUserUniquenessAsync(string email, string phoneNumber, CancellationToken cancellation)
+    {
+        if (await _userManager.Users.AnyAsync(x => x.Email == email, cancellation))
+            return Result.Failure(UserErrors.DuplicatedEmail);
+
+        if (await _userManager.Users.AnyAsync(x => x.PhoneNumber == phoneNumber, cancellation))
+            return Result.Failure(UserErrors.DuplicatedPhoneNumber);
+
+        return Result.Success();
+    }
+    private async Task<Result> CreateUserAsync(ApplicationUser user, string password, string role, CancellationToken cancellation)
+    {
+        var result = await _userManager.CreateAsync(user, password);
+        if (!result.Succeeded)
+        {
+            var error = result.Errors.First();
+            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        _logger.LogInformation("Confirmation Token: {token}", token);
+
+        await _userManager.AddToRoleAsync(user, role);
+        await SendConfirmationEmail(user, token);
+
+        return Result.Success();
     }
 }
