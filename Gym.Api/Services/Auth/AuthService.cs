@@ -4,8 +4,10 @@ using Gym.Api.Authentications;
 using Gym.Api.Contracts.Authentications;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
+using Gym.Api.Helper;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -15,12 +17,16 @@ namespace Gym.Api.Services.Auth;
 public class AuthService(UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider
-    ,ILogger<AuthService> logger) : IAuthService
+    ,ILogger<AuthService> logger,
+    IEmailSender emailSender,
+    IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
     private readonly IJwtProvider _jwtProvider = jwtProvider;
     private readonly ILogger<AuthService> _logger = logger;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellation = default)
     {
@@ -71,6 +77,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,
             await _userManager.AddToRoleAsync(user, AppRoles.Member);
 
             // create new member
+            await SendConfirmationEmail(user, token);
 
             return Result.Success();
         }
@@ -116,8 +123,23 @@ public class AuthService(UserManager<ApplicationUser> userManager,
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
         _logger.LogInformation("Confirmation Token,{token}", token);
-        // send email
+
+        await SendConfirmationEmail(user, token);
 
         return Result.Success();
+    }
+    private async Task SendConfirmationEmail(ApplicationUser user, string token)
+    {
+        var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
+            templateModel: new Dictionary<string, string>
+            {
+                { "{{name}}", user.FirstName },
+                    { "{{action_url}}", $"{origin}/auth/emailConfirmation?userId={user.Id}&code={token}" }
+            }
+        );
+        await _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody);
+        await Task.CompletedTask;
     }
 }
