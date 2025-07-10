@@ -9,6 +9,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
     public DbSet<Member> Members { get; set; }
+    public DbSet<Trainer> Trainers { get; set; }
+    public DbSet<Staff> Staffs { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
        
