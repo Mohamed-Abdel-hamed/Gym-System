@@ -6,9 +6,10 @@ using System.Net.Mail;
 
 namespace Gym.Api.Services.Email;
 
-public class EmailService(IOptions<MailSettings> _mailSettings) : IEmailSender
+public class EmailService(IOptions<MailSettings> _mailSettings,IWebHostEnvironment webHostEnvironment) : IEmailSender
 {
     private readonly MailSettings _mailSettings = _mailSettings.Value;
+    private readonly IWebHostEnvironment _webHostEnvironment = webHostEnvironment;
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
@@ -19,7 +20,7 @@ public class EmailService(IOptions<MailSettings> _mailSettings) : IEmailSender
             Subject = subject,
             IsBodyHtml = true
         };
-        message.To.Add(email);
+        message.To.Add(_webHostEnvironment.IsDevelopment() ? "mohamed7abdelhamid594@gmail.com" : email);
         SmtpClient smtpClient = new(_mailSettings.Host)
         {
             Port = _mailSettings.Port,
