@@ -1,4 +1,6 @@
 ﻿using Gym.Api.Abstractions;
+using Gym.Api.Abstractions.Consts;
+using Gym.Api.Authentications;
 using Gym.Api.Contracts.Authentications;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
@@ -10,11 +12,40 @@ using System.Text;
 
 namespace Gym.Api.Services.Auth;
 
-public class AuthService(UserManager<ApplicationUser> userManager,ILogger<AuthService> logger) : IAuthService
+public class AuthService(UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    IJwtProvider jwtProvider
+    ,ILogger<AuthService> logger) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+    private readonly IJwtProvider _jwtProvider = jwtProvider;
     private readonly ILogger<AuthService> _logger = logger;
 
+    public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellation = default)
+    {
+        if(await _userManager.FindByEmailAsync(email) is not { } user)
+            return Result.Failure<AuthResponse>(UserErrors.UserNotFound);
+
+        var result = await _signInManager.PasswordSignInAsync(user, password,false,true);
+
+        if(result.Succeeded)
+        {
+            var(token,expiresIn)=_jwtProvider.GenerateToken(user);
+
+            var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn);
+
+            return Result.Success(response);
+        }
+        var error = result.IsNotAllowed
+                    ? UserErrors.EmailNotConfirmed
+                    : result.IsLockedOut
+                    ? UserErrors.LockedUser
+                    : UserErrors.InvalidCredentials;
+
+        return Result.Failure<AuthResponse>(error);
+
+    }
     public async Task<Result> RegisterAsync(RegisterRequest request,CancellationToken cancellation=default)
     {
         var emailIsExists = await _userManager.Users.AnyAsync(x=>x.Email==request.Email,cancellation);
@@ -36,6 +67,11 @@ public class AuthService(UserManager<ApplicationUser> userManager,ILogger<AuthSe
             token=WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
             _logger.LogInformation("Confirmation Token,{token}",token);
+
+            await _userManager.AddToRoleAsync(user, AppRoles.Member);
+
+            // create new member
+
             return Result.Success();
         }
         var error=result.Errors.First();
