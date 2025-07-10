@@ -5,6 +5,7 @@ using Gym.Api.Contracts.Authentications;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Helper;
+using Gym.Api.Persistence;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -14,13 +15,15 @@ using System.Text;
 
 namespace Gym.Api.Services.Auth;
 
-public class AuthService(UserManager<ApplicationUser> userManager,
+public class AuthService(ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider
     ,ILogger<AuthService> logger,
     IEmailSender emailSender,
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
+    private readonly ApplicationDbContext _context = context;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
     private readonly IJwtProvider _jwtProvider = jwtProvider;
@@ -76,9 +79,14 @@ public class AuthService(UserManager<ApplicationUser> userManager,
 
             await _userManager.AddToRoleAsync(user, AppRoles.Member);
 
-            // create new member
             await SendConfirmationEmail(user, token);
 
+            Member member = new()
+            {
+                UserId=user.Id
+            };
+            _context.Members.Add(member);
+            _context.SaveChanges();
             return Result.Success();
         }
         var error=result.Errors.First();
