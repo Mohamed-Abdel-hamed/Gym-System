@@ -8,6 +8,7 @@ namespace Gym.Api.Persistence;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser> (options)
 {
     public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+    public DbSet<Member> Members { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
        
