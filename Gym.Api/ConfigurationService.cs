@@ -12,6 +12,8 @@ using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Gym.Api.Authentications;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 
 namespace Gym.Api;
 
@@ -22,7 +24,8 @@ public static class ConfigurationService
         services.AddDbContextConfig(configuration)
             .AddIdentityConfig(configuration)
             .AddServicesConfig()
-            .AddMapsterConfig();
+            .AddMapsterConfig()
+            .AddFluentValidationConfig();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -97,6 +100,14 @@ public static class ConfigurationService
         var mappingConfig = TypeAdapterConfig.GlobalSettings;
         mappingConfig.Scan(Assembly.GetExecutingAssembly());
         services.AddSingleton<IMapper>(new Mapper(mappingConfig));
+        return services;
+    }
+    private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
+    {
+        services
+            .AddFluentValidationAutoValidation()
+            .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
         return services;
     }
 }
