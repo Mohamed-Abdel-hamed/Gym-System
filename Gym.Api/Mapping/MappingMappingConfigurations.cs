@@ -1,4 +1,5 @@
 ﻿using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
 using Gym.Api.Entities;
 using Mapster;
@@ -13,6 +14,9 @@ public class MappingMappingConfigurations : IRegister
             .Map(dest=>dest.UserName,src=>src.Email);
 
         config.NewConfig<RegisterTrainerRequest, ApplicationUser>()
+           .Map(dest => dest.UserName, src => src.Info.Email);
+
+        config.NewConfig<RegisterStaffRequest, ApplicationUser>()
            .Map(dest => dest.UserName, src => src.Info.Email);
     }
 }
