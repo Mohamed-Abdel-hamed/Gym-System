@@ -3,6 +3,7 @@ using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
 using Gym.Api.Authentications;
 using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
@@ -59,7 +60,7 @@ public class AuthService(ApplicationDbContext context,
     }
     public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellation = default)
     {
-        var checkUserUniqueness= await CheckUserUniquenessAsync(request.Email, request.Password,cancellation);
+        var checkUserUniqueness= await CheckUserUniquenessAsync(request.Email, request.PhoneNumber,cancellation);
 
         if (!checkUserUniqueness.IsSuccess)
 
@@ -67,7 +68,7 @@ public class AuthService(ApplicationDbContext context,
 
         ApplicationUser user = request.Adapt<ApplicationUser>();
 
-        var result = await CreateUserAsync(user, request.Password, AppRoles.Trainer, cancellation);
+        var result = await CreateUserAsync(user, request.Password, AppRoles.Member, cancellation);
 
         if (!result.IsSuccess)
             return result;
@@ -84,7 +85,7 @@ public class AuthService(ApplicationDbContext context,
     }
     public async Task<Result> RegisterTrainerAsync(RegisterTrainerRequest request, CancellationToken cancellation = default)
     {
-        var checkUserUniqueness = await CheckUserUniquenessAsync(request.Info.Email, request.Info.Password, cancellation);
+        var checkUserUniqueness = await CheckUserUniquenessAsync(request.Info.Email, request.Info.PhoneNumber, cancellation);
 
         if (!checkUserUniqueness.IsSuccess)
 
@@ -108,6 +109,31 @@ public class AuthService(ApplicationDbContext context,
         return Result.Success();
     }
 
+    public async Task<Result> RegisterStaffAsync(RegisterStaffRequest request, CancellationToken cancellation = default)
+    {
+        var checkUserUniqueness = await CheckUserUniquenessAsync(request.Info.Email, request.Info.PhoneNumber, cancellation);
+
+        if (!checkUserUniqueness.IsSuccess)
+
+            return checkUserUniqueness;
+
+        ApplicationUser user = request.Info.Adapt<ApplicationUser>();
+
+        var result = await CreateUserAsync(user, request.Info.Password, AppRoles.Staff, cancellation);
+
+        if (!result.IsSuccess)
+            return result;
+
+       Staff staff = new()
+        {
+            HireDate = request.HireDate,
+            UserId = user.Id
+        };
+
+        _context.Staffs.Add(staff);
+        _context.SaveChanges();
+        return Result.Success();
+    }
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
     {
         if (await _userManager.FindByIdAsync(request.UserId) is not { } user)
