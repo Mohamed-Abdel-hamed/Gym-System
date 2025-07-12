@@ -1,4 +1,5 @@
-﻿using Gym.Api.Entities;
+﻿using Gym.Api.Abstractions.Consts;
+using Gym.Api.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,7 +19,8 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             new(JwtRegisteredClaimNames.Email,user.Email!),
             new(JwtRegisteredClaimNames.GivenName,user.FirstName),
             new(JwtRegisteredClaimNames.FamilyName,user.LastName),
-            new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+             new Claim(ClaimTypes.Role, AppRoles.Admin)
             ];
 
         var symmtricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
