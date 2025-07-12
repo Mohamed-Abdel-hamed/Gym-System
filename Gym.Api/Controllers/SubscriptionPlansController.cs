@@ -26,4 +26,23 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
         return result.IsSuccess ? Ok() : result.ToProblem();
 
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id,SubscriptionPlanRequest request, CancellationToken cancellation)
+    {
+        var result = await _planService.UpdateAsync(id,request, cancellation);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+
+    }
+
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellation)
+    {
+        var result = await _planService.DeleteAsync(id, cancellation);
+
+        return result.IsSuccess ? NoContent() : result.ToProblem();
+
+    }
 }
