@@ -33,6 +33,9 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
             return Result.Failure(SubscriptionPlanError.AlreadyExists);
         SubscriptionPlan subscriptionPlan=request.Adapt<SubscriptionPlan>();
 
+        await _context.SubscriptionPlans.AddAsync(subscriptionPlan,cancellation);
+        await _context.SaveChangesAsync(cancellation);
+
         return Result.Success();
     }
 }
