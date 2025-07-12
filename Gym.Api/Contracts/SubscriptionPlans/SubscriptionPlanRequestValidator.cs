@@ -32,7 +32,6 @@ namespace Gym.Api.Contracts.SubscriptionPlans
             RuleFor(x => x.MaxFreezeDays)
                 .GreaterThanOrEqualTo(0).WithMessage("Max freeze days cannot be negative.");
 
-            // Example of a custom rule if you want logical consistency
             RuleFor(x => x.MaxFreezeDays)
                 .LessThanOrEqualTo(x => x.DurationInDays)
                 .WithMessage("Max freeze days cannot exceed the plan duration.");
