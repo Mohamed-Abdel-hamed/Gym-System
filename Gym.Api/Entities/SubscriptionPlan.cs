@@ -17,5 +17,6 @@ public class SubscriptionPlan
 
     public int MaxFreezesPerYear { get; set; }
     public int MaxFreezeDays { get; set; }
+    public ICollection<Membership> Memberships { get; set; } = [];
 
 }

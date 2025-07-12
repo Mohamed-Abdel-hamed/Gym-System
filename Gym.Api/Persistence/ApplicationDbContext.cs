@@ -11,6 +11,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Member> Members { get; set; }
     public DbSet<Trainer> Trainers { get; set; }
     public DbSet<Staff> Staffs { get; set; }
+    public DbSet<Membership> Memberships { get; set; }
+    public DbSet<Payment> Payments { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
        
