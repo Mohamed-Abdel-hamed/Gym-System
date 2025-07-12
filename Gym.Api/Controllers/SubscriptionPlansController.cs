@@ -1,4 +1,6 @@
 ﻿using Gym.Api.Abstractions;
+using Gym.Api.Contracts.SubscriptionPlans;
+using Gym.Api.Entities;
 using Gym.Api.Services.SubscriptionPlans;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +16,14 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     {
        var result= await _planService.GetAllAsync(cancellation);
         return result.IsSuccess? Ok(result.Value):result.ToProblem();
+
+    }
+    [HttpPost("")]
+    public async Task<IActionResult> Add(SubscriptionPlanRequest request,CancellationToken cancellation)
+    {
+        var result = await _planService.AddAsync(request,cancellation);
+ 
+        return result.IsSuccess ? Ok() : result.ToProblem();
 
     }
 }
