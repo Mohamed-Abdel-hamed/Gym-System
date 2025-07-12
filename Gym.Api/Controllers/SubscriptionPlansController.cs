@@ -1,12 +1,15 @@
 ﻿using Gym.Api.Abstractions;
+using Gym.Api.Abstractions.Consts;
 using Gym.Api.Contracts.SubscriptionPlans;
 using Gym.Api.Entities;
 using Gym.Api.Services.SubscriptionPlans;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gym.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles =AppRoles.Admin)]
 public class SubscriptionPlansController(ISubscriptionPlanService planService) : ControllerBase
 {
     private readonly ISubscriptionPlanService _planService = planService;
