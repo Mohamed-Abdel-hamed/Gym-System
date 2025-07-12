@@ -7,6 +7,7 @@ public record SubscriptionPlanRequest
         bool UnlimitedDailyEntries,
         decimal Price,
         int DurationInDays,
+        bool SupportsAutoRenewal,
         int MaxClassBookingsPerDay,
         int MaxClassBookingsInFuture,
         int MaxFreezesPerYear,
