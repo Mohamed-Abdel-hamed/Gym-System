@@ -43,7 +43,7 @@ public class AuthService(ApplicationDbContext context,
 
         if (result.Succeeded)
         {
-            var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+            var (token, expiresIn) = await _jwtProvider.GenerateToken(user);
 
             var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn);
 
