@@ -10,6 +10,8 @@ public class SubscriptionPlan
 
     public int DurationInDays { get; set; }
 
+    public bool SupportsAutoRenewal { get; set; } = false;
+
     public int MaxClassBookingsPerDay { get; set; }
     public int MaxClassBookingsInFuture { get; set; }
 
