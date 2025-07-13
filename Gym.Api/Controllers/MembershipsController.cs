@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace Gym.Api.Controllers;
 [Route("api/SubscriptionPlane/{planeId}/[controller]")]
 [ApiController]
-//[Authorize(Roles =AppRoles.Member)]
+[Authorize(Roles =AppRoles.Member)]
 public class MembershipsController(IMembershipService _membershipService) : ControllerBase
 {
     private readonly IMembershipService _membershipService = _membershipService;
@@ -27,10 +27,10 @@ public class MembershipsController(IMembershipService _membershipService) : Cont
         var result = await _membershipService.SuccessAsync(id);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
-    [HttpGet]
+    [HttpGet("error")]
     public  IActionResult Error()
     {
-        return Ok("Error Proccess");
+        return Ok("Error Subscribe");
     }
 
 }
