@@ -15,7 +15,7 @@ public class Membership
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 
-    public MembershipStatus Status { get; set; } = MembershipStatus.Active;
+    public MembershipStatus Status { get; set; } 
 
     // Auto-renewal options (per user instance)
     public bool AutoRenew { get; set; } = false;
