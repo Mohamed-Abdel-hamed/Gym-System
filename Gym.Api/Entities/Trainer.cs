@@ -6,4 +6,5 @@ public class Trainer
     public string UserId { get; set; } = string.Empty;
     public ApplicationUser User { get; set; } = default!;
     public DateOnly HireDate { get; set; }
+    public ICollection<Class> ClassesTaught { get; set; } = [];
 }

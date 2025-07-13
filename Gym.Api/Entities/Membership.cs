@@ -21,4 +21,5 @@ public class Membership
     public bool AutoRenew { get; set; } = false;
     public bool AutoRenewPaid { get; set; } = false;
     public ICollection<Payment> Payments { get; set; } = [];
+    public ICollection<MembershipFreeze> Freezes { get; set; } = [];
 }
