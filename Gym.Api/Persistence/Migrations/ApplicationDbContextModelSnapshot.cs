@@ -113,7 +113,7 @@ namespace Gym.Api.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Members");
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("Gym.Api.Entities.Membership", b =>
@@ -151,7 +151,7 @@ namespace Gym.Api.Persistence.Migrations
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("Memberships");
+                    b.ToTable("Memberships", (string)null);
                 });
 
             modelBuilder.Entity("Gym.Api.Entities.Payment", b =>
@@ -189,7 +189,7 @@ namespace Gym.Api.Persistence.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Gym.Api.Entities.Staff", b =>
@@ -211,7 +211,7 @@ namespace Gym.Api.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Staffs");
+                    b.ToTable("Staffs", (string)null);
                 });
 
             modelBuilder.Entity("Gym.Api.Entities.SubscriptionPlan", b =>
@@ -261,7 +261,7 @@ namespace Gym.Api.Persistence.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("SubscriptionPlans");
+                    b.ToTable("SubscriptionPlans", (string)null);
                 });
 
             modelBuilder.Entity("Gym.Api.Entities.Trainer", b =>
@@ -283,7 +283,7 @@ namespace Gym.Api.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Trainers");
+                    b.ToTable("Trainers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
