@@ -4,6 +4,7 @@ using Gym.Api.Persistence;
 using Gym.Api.Seeds;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:Secretkey").Get<string>();
 app.UseAuthorization();
 
 var scopeFactory=app.Services.GetRequiredService<IServiceScopeFactory>();

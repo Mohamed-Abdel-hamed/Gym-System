@@ -17,6 +17,7 @@ using FluentValidation;
 using Gym.Api.Settings;
 using Gym.Api.Services.Email;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Gym.Api.Services.Memberships;
 
 namespace Gym.Api;
 
@@ -31,6 +32,7 @@ public static class ConfigurationService
             .AddFluentValidationConfig();
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+        services.Configure<StripeSettings>(configuration.GetSection("stripe"));
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -55,6 +57,7 @@ public static class ConfigurationService
         services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IMembershipService,MembershipService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
