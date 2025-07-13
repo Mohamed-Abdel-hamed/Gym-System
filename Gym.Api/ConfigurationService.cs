@@ -18,6 +18,7 @@ using Gym.Api.Settings;
 using Gym.Api.Services.Email;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Gym.Api.Services.Memberships;
+using Gym.Api.Services.MembershipFreezes;
 
 namespace Gym.Api;
 
@@ -58,6 +59,7 @@ public static class ConfigurationService
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IMembershipService,MembershipService>();
+        services.AddScoped<IMembershipFreezeService, MembershipFreezeService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
