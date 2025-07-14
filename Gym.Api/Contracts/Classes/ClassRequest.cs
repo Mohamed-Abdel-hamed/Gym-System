@@ -2,7 +2,7 @@
 
 public record ClassRequest
     (
-    string Name,
+    string Title,
     int? Capacity,
     TimeSpan Duration
     );

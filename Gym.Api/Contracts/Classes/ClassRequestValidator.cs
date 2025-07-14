@@ -6,7 +6,7 @@ public class ClassRequestValidator : AbstractValidator<ClassRequest>
 {
     public ClassRequestValidator()
     {
-        RuleFor(x=>x.Name)
+        RuleFor(x=>x.Title)
             .NotEmpty()
             .Length(3,100);
 
@@ -15,5 +15,8 @@ public class ClassRequestValidator : AbstractValidator<ClassRequest>
                    .WithMessage("Gym class must be at least 15 minutes long.")
                    .LessThanOrEqualTo(TimeSpan.FromHours(2))
                    .WithMessage("Gym class cannot be longer than 2 hours.");
+
+        RuleFor(x => x.Capacity)
+            .LessThanOrEqualTo(25);
     }
 }
