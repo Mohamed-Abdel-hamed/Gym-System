@@ -126,7 +126,7 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         var currentFreeze = membership.Freezes
              .Where(f => f.EndDate >= membership.StartDate &&
              f.StartDate <= membership.EndDate &&
-             f.EndDate > now).SingleOrDefault();//.OrderByDescending(f=>f.StartDate).FirstOrDefault();
+             f.EndDate > now).SingleOrDefault();
 
         if (currentFreeze is null)
             return Result.Failure(MembershipFreezeErrors.NotExistsFreeze);
