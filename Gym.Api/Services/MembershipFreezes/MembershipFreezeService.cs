@@ -67,14 +67,14 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         ///////////////////////////////////////////////////////////////////////////////////////////
         ///
 
-        var usedFreezeDays = membership.Freezes
-             .Where(f => f.EndDate >= membership.StartDate&& f.StartDate <= membership.EndDate)
+        var currentFreeze = membership.Freezes
+             .Where(f => f.EndDate >= membership.StartDate && f.StartDate <= membership.EndDate);
 
-            .Sum(f=>(f.EndDate-f.StartDate).Days);
+        var usedFreezeDays= currentFreeze.Sum(f=>(f.EndDate-f.StartDate).Days);
         var maxAllowedFreezeDays = membership.Plan.MaxFreezeDays * membership.Plan.MaxFreezesPerYear;
         var remainingFreezeDays = maxAllowedFreezeDays - usedFreezeDays;
 
-        if (remainingFreezeDays <= 0 || membership.Freezes.Count >= membership.Plan.MaxFreezesPerYear)
+        if (remainingFreezeDays <= 0 || currentFreeze.Count() >= membership.Plan.MaxFreezesPerYear)
             return Result.Failure(MembershipFreezeErrors.NotAllowedFreezeCount);
 
         // Use the smaller of MaxFreezeDays and the remaining allowed days
