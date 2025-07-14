@@ -22,4 +22,12 @@ public class MembershipFreezesController(IMembershipFreezeService membershipFree
 
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
+    [HttpPost("cancel")]
+    public async Task<IActionResult> Cancel([FromRoute] int membershipId, CancellationToken cancellation = default)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        var result = await _membershipFreezeService.UnFreezeAsync(userId, membershipId, cancellation);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
 }

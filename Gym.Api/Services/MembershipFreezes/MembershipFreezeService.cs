@@ -18,24 +18,28 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
 
         if (member is null)
             return Result.Failure(UserErrors.UserNotFound);
+
         /////////////////////////////////////////////////////////////
 
         var membership = await _context.Memberships
             .Include(x=>x.Plan)
             .Include(x=>x.Freezes)
             .SingleOrDefaultAsync(x=>x.MemberId==member.Id&&x.Id==membershipId,cancellation);
-        ///////////////////////////////////////////////////////////////////////////////////////////
 
         if (membership is null) 
             return Result.Failure(MembershipErrors.NotFound);
+
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         if (membership.Status!=MembershipStatus.Active)
             return Result.Failure(MembershipErrors.NotActive);
+
         ///////////////////////////////////////////////////////////////////////////////////////////
-        ///
+        
         if (membership.Plan.MaxFreezeDays == 0)
             return Result.Failure(MembershipFreezeErrors.NotExistsFreeze);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
 
         var now = DateTime.Now;
 
@@ -43,10 +47,10 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
 
         double TotalDays = remainingSubscriptionPeriod.Days;
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
 
         if (TotalDays < membership.Plan.MaxFreezeDays)
             return Result.Failure(MembershipFreezeErrors.NotAllowedFreeze);
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         ///
         // If the member paid for 2 periods (AutoRenewPaid == true),
@@ -68,7 +72,7 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         ///
 
         var currentFreeze = membership.Freezes
-             .Where(f => f.EndDate >= membership.StartDate && f.StartDate <= membership.EndDate);
+             .Where(f => f.EndDate >= membership.StartDate && f.StartDate <= membership.EndDate&&f.EndDate>now);
 
         var usedFreezeDays= currentFreeze.Sum(f=>(f.EndDate-f.StartDate).Days);
         var maxAllowedFreezeDays = membership.Plan.MaxFreezeDays * membership.Plan.MaxFreezesPerYear;
@@ -93,6 +97,45 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         await _context.SaveChangesAsync(cancellation);
 
 
+        return Result.Success();
+    }
+
+    public async Task<Result> UnFreezeAsync(string userId,int membershipId,CancellationToken cancellation=default)
+    {
+        var member = await _context.Members.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+
+        if (member is null)
+            return Result.Failure(UserErrors.UserNotFound);
+        /////////////////////////////////////////////////////////////
+
+        var membership = await _context.Memberships
+            .Include(m=>m.Freezes)
+            .SingleOrDefaultAsync(x => x.MemberId == member.Id && x.Id == membershipId, cancellation);
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        if (membership is null)
+            return Result.Failure(MembershipErrors.NotFound);
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        if (membership.Status != MembershipStatus.Freeze)
+            return Result.Failure(MembershipErrors.NotFreeze);
+
+        var now = DateTime.Now;
+
+        // var tomorrow = DateTime.Now.Date.AddDays(1);
+        var currentFreeze = membership.Freezes
+             .Where(f => f.EndDate >= membership.StartDate &&
+             f.StartDate <= membership.EndDate &&
+             f.EndDate > now).SingleOrDefault();//.OrderByDescending(f=>f.StartDate).FirstOrDefault();
+
+        if (currentFreeze is null)
+            return Result.Failure(MembershipFreezeErrors.NotExistsFreeze);
+
+        membership.Status = MembershipStatus.Active;
+
+        currentFreeze.EndDate = now;
+
+        await _context.SaveChangesAsync(cancellation);
         return Result.Success();
     }
 }
