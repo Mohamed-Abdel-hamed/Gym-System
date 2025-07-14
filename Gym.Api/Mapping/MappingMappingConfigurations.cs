@@ -1,4 +1,5 @@
 ﻿using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Classes;
 using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
 using Gym.Api.Entities;
@@ -18,5 +19,11 @@ public class MappingMappingConfigurations : IRegister
 
         config.NewConfig<RegisterStaffRequest, ApplicationUser>()
            .Map(dest => dest.UserName, src => src.Info.Email);
+
+
+        config.NewConfig<ClassRequest, Class>()
+       .Map(dest => dest.Duration, src => TimeSpan.FromMinutes(src.Duration))
+       .Map(dest => dest.Capacity, src => src.Capacity ?? 20);
+
     }
 }
