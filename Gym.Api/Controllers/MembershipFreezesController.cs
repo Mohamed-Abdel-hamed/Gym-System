@@ -1,0 +1,25 @@
+﻿using Gym.Api.Abstractions;
+using Gym.Api.Abstractions.Consts;
+using Gym.Api.Services.MembershipFreezes;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace Gym.Api.Controllers;
+[Route("api/membershipId/{membershipId}/[controller]")]
+[ApiController]
+[Authorize(Roles = AppRoles.Member)]
+public class MembershipFreezesController(IMembershipFreezeService membershipFreezeService) : ControllerBase
+{
+    private readonly IMembershipFreezeService _membershipFreezeService = membershipFreezeService;
+
+    [HttpPost("add-freeze")]
+    public async Task<IActionResult> Add([FromRoute] int membershipId,CancellationToken cancellation=default)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        var result=await _membershipFreezeService.AddAsync(userId, membershipId, cancellation);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+}
