@@ -11,12 +11,13 @@ public class ClassRequestValidator : AbstractValidator<ClassRequest>
             .Length(3,100);
 
         RuleFor(c => c.Duration)
-                   .GreaterThanOrEqualTo(TimeSpan.FromMinutes(15))
+                   .GreaterThanOrEqualTo(15)
                    .WithMessage("Gym class must be at least 15 minutes long.")
-                   .LessThanOrEqualTo(TimeSpan.FromHours(2))
+                   .LessThanOrEqualTo(120)
                    .WithMessage("Gym class cannot be longer than 2 hours.");
 
         RuleFor(x => x.Capacity)
-            .LessThanOrEqualTo(25);
+            .GreaterThanOrEqualTo(10)
+           .LessThanOrEqualTo(25);
     }
 }

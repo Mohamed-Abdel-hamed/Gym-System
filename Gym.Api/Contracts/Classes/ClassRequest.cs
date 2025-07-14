@@ -4,5 +4,5 @@ public record ClassRequest
     (
     string Title,
     int? Capacity,
-    TimeSpan Duration
+    int Duration
     );
