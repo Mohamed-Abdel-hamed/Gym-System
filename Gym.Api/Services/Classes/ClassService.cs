@@ -18,10 +18,22 @@ public class ClassService(ApplicationDbContext context) : IClassService
         if (!isExistsTrainer)
             return Result.Failure(TrainerErrors.NotFound);
 
-        var isExistsClass=await _context.Classes.AnyAsync(x=>x.Title == request.Title&&x.TrainerId == trainerId,cancellation);
+        var classes = await _context.Classes
+    .Where(x => x.Title == request.Title && x.TrainerId == trainerId)
+    .ToListAsync(cancellation);
 
-        if (isExistsClass)
-            return Result.Failure(ClassErrors.AlreadyExists);
+        DateTime now = DateTime.Now;
+
+        foreach (var item in classes)
+        {
+            DateTime endDate = item.StartDate.Add(item.Duration);
+
+            if (endDate > now)
+            {
+
+                return Result.Failure(ClassErrors.AlreadyExists);
+            }
+        }
 
         Class newClass = request.Adapt<Class>();
         newClass.TrainerId = trainerId;
