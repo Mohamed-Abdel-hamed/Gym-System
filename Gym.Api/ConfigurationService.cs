@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Gym.Api.Services.Memberships;
 using Gym.Api.Services.MembershipFreezes;
 using Gym.Api.Services.Classes;
+using Gym.Api.Services.Bookings;
 
 namespace Gym.Api;
 
@@ -62,6 +63,7 @@ public static class ConfigurationService
         services.AddScoped<IMembershipService,MembershipService>();
         services.AddScoped<IMembershipFreezeService, MembershipFreezeService>();
         services.AddScoped<IClassService, ClassService>();
+        services.AddScoped<IBookingService,BookingService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
