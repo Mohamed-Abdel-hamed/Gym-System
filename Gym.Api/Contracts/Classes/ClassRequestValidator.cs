@@ -19,5 +19,9 @@ public class ClassRequestValidator : AbstractValidator<ClassRequest>
         RuleFor(x => x.Capacity)
             .GreaterThanOrEqualTo(10)
            .LessThanOrEqualTo(25);
+
+        RuleFor(x => x.StartDate)
+            .GreaterThan(DateTime.Now)
+            .WithMessage("Class must start in the future.");
     }
 }
