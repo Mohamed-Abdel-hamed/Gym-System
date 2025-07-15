@@ -13,5 +13,4 @@ public class Booking
 
     public BookingStatus Status { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.Now;
-    public int? WaitlistPosition { get; set; }
 }
