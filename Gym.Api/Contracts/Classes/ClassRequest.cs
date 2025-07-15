@@ -4,5 +4,6 @@ public record ClassRequest
     (
     string Title,
     int? Capacity,
-    int Duration
+    int Duration,
+    DateTime StartDate
     );
