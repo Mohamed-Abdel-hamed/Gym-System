@@ -3,6 +3,7 @@ using Gym.Api.Entities;
 using Gym.Api.Persistence;
 using Gym.Api.Seeds;
 using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Stripe;
@@ -22,7 +23,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-app.UseHangfireDashboard("/jobs");
+app.UseHangfireDashboard("/jobs",new DashboardOptions
+{
+    Authorization = [
+        new HangfireCustomBasicAuthenticationFilter
+        {
+            User=app.Configuration.GetValue<string>("HangfireSettings:Username"),
+            Pass=app.Configuration.GetValue<string>("HangfireSettings:Password")
+        }
+        ],
+      DashboardTitle = "Gym Management Jobs"
+});
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:Secretkey").Get<string>();
 app.UseAuthorization();
 
