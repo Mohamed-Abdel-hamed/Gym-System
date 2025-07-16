@@ -10,6 +10,7 @@ using Gym.Api.Errors;
 using Gym.Api.Helper;
 using Gym.Api.Persistence;
 using Gym.Api.Services.Email;
+using Hangfire;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -194,7 +195,8 @@ public class AuthService(ApplicationDbContext context,
         var emailBody = _emailBodyBuilder.GetEmailBody
             (EmailTemplates.EmailConfirmation, placeHolder);
 
-        await _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody);
+        BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody));
+
         await Task.CompletedTask;
     }
 
