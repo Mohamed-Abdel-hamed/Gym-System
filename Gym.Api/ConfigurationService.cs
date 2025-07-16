@@ -60,6 +60,7 @@ public static class ConfigurationService
         services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IEmailBodyBuilder, EmailBodyBuilder>();
         services.AddScoped<IMembershipService,MembershipService>();
         services.AddScoped<IMembershipFreezeService, MembershipFreezeService>();
         services.AddScoped<IClassService, ClassService>();
