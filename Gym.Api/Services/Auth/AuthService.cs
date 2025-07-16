@@ -9,6 +9,7 @@ using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Helper;
 using Gym.Api.Persistence;
+using Gym.Api.Services.Email;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -24,6 +25,7 @@ public class AuthService(ApplicationDbContext context,
     IJwtProvider jwtProvider
     , ILogger<AuthService> logger,
     IEmailSender emailSender,
+    IEmailBodyBuilder emailBodyBuilder,
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     private readonly ApplicationDbContext _context = context;
@@ -32,6 +34,7 @@ public class AuthService(ApplicationDbContext context,
     private readonly IJwtProvider _jwtProvider = jwtProvider;
     private readonly ILogger<AuthService> _logger = logger;
     private readonly IEmailSender _emailSender = emailSender;
+    private readonly IEmailBodyBuilder _emailBodyBuilder = emailBodyBuilder;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellation = default)
@@ -182,13 +185,15 @@ public class AuthService(ApplicationDbContext context,
     {
         var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
-        var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
-            templateModel: new Dictionary<string, string>
-            {
-                { "{{name}}", user.FirstName },
-                    { "{{action_url}}", $"{origin}/auth/emailConfirmation?userId={user.Id}&code={token}" }
-            }
-        );
+        var placeHolder = new Dictionary<string, string>
+        {
+            {"{{name}}",user.FirstName},
+            {"{{action_url}}",$"{origin}/auth/emailConfirmation?userId={user.Id}&code={token}"},
+        };
+
+        var emailBody = _emailBodyBuilder.GetEmailBody
+            (EmailTemplates.EmailConfirmation, placeHolder);
+
         await _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody);
         await Task.CompletedTask;
     }
