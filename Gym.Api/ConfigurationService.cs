@@ -21,6 +21,7 @@ using Gym.Api.Services.Memberships;
 using Gym.Api.Services.MembershipFreezes;
 using Gym.Api.Services.Classes;
 using Gym.Api.Services.Bookings;
+using Hangfire;
 
 namespace Gym.Api;
 
@@ -32,7 +33,8 @@ public static class ConfigurationService
             .AddIdentityConfig(configuration)
             .AddServicesConfig()
             .AddMapsterConfig()
-            .AddFluentValidationConfig();
+            .AddFluentValidationConfig()
+            .AddHangfireConfig(configuration);
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
         services.Configure<StripeSettings>(configuration.GetSection("stripe"));
@@ -125,6 +127,18 @@ public static class ConfigurationService
             .AddFluentValidationAutoValidation()
             .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+        return services;
+    }
+    private static IServiceCollection AddHangfireConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        // Add the processing server as IHostedService
+        services.AddHangfireServer();
         return services;
     }
 }

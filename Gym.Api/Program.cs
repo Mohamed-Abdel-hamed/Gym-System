@@ -2,6 +2,7 @@ using Gym.Api;
 using Gym.Api.Entities;
 using Gym.Api.Persistence;
 using Gym.Api.Seeds;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Stripe;
@@ -21,6 +22,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+app.UseHangfireDashboard("/jobs");
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:Secretkey").Get<string>();
 app.UseAuthorization();
 
