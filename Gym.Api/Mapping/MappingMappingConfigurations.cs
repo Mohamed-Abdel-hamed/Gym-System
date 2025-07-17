@@ -27,5 +27,9 @@ public class MappingMappingConfigurations : IRegister
         config.NewConfig<Class, ClassResponse>()
             .Map(dest => dest.TrainerName, src => $"{src.Trainer.User.FirstName} {src.Trainer.User.LastName}");
 
+
+        config.NewConfig<Trainer, TrainerResponse>()
+            .Map(dest => dest.Classes, src => src.ClassesTaught);
+
     }
 }
