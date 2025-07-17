@@ -23,6 +23,7 @@ using Gym.Api.Services.Classes;
 using Gym.Api.Services.Bookings;
 using Hangfire;
 using Gym.Api.Services.Members;
+using Gym.Api.Services.Trainers;
 
 namespace Gym.Api;
 
@@ -69,6 +70,7 @@ public static class ConfigurationService
         services.AddScoped<IClassService, ClassService>();
         services.AddScoped<IBookingService,BookingService>();
         services.AddScoped<IMemberSerive, MemberSerive>();
+        services.AddScoped<ITrainerService, TrainerService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
