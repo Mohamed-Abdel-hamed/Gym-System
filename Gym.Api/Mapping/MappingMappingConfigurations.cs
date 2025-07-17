@@ -24,6 +24,8 @@ public class MappingMappingConfigurations : IRegister
         config.NewConfig<ClassRequest, Class>()
        .Map(dest => dest.Duration, src => TimeSpan.FromMinutes(src.Duration))
        .Map(dest => dest.Capacity, src => src.Capacity ?? 20);
+        config.NewConfig<Class, ClassResponse>()
+            .Map(dest => dest.TrainerName, src => $"{src.Trainer.User.FirstName} {src.Trainer.User.LastName}");
 
     }
 }
