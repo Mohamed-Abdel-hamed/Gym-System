@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace Gym.Api.Controllers;
 [Route("api/SubscriptionPlane/{planeId}/[controller]")]
 [ApiController]
-//[Authorize(Roles =AppRoles.Member)]
 public class MembershipsController(IMembershipService _membershipService) : ControllerBase
 {
     private readonly IMembershipService _membershipService = _membershipService;
