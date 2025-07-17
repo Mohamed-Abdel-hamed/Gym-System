@@ -22,6 +22,7 @@ using Gym.Api.Services.MembershipFreezes;
 using Gym.Api.Services.Classes;
 using Gym.Api.Services.Bookings;
 using Hangfire;
+using Gym.Api.Services.Members;
 
 namespace Gym.Api;
 
@@ -67,6 +68,7 @@ public static class ConfigurationService
         services.AddScoped<IMembershipFreezeService, MembershipFreezeService>();
         services.AddScoped<IClassService, ClassService>();
         services.AddScoped<IBookingService,BookingService>();
+        services.AddScoped<IMemberSerive, MemberSerive>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
