@@ -1,47 +1,47 @@
-﻿using Azure;
-using Gym.Api.Abstractions;
+﻿using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Persistence;
-using Mapster;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Gym.Api.Services.Email;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Stripe;
 using Stripe.Checkout;
-using Stripe.V2;
-using System.Numerics;
 
 namespace Gym.Api.Services.Memberships;
 
-public class MembershipService(ApplicationDbContext context) : IMembershipService
+public class MembershipService(ApplicationDbContext context,
+    IEmailSender emailSender,
+    IEmailBodyBuilder emailBodyBuilder) : IMembershipService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IEmailBodyBuilder _emailBodyBuilder = emailBodyBuilder;
 
-    public async Task<Result<string>> SubscribeAsync(int planeId, bool autoRenew,string userId,CancellationToken cancellation=default)
+    public async Task<Result<string>> SubscribeAsync(int planeId, bool autoRenew, string userId, CancellationToken cancellation = default)
     {
-       var member=await _context.Members.SingleOrDefaultAsync(x=>x.UserId==userId,cancellation);
+        var member = await _context.Members.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
-        if(member is null)
+        if (member is null)
             return Result.Failure<string>(UserErrors.UserNotFound);
 
-        var plane = await _context.SubscriptionPlans.FindAsync(planeId,cancellation);
+        var plane = await _context.SubscriptionPlans.FindAsync(planeId, cancellation);
 
-        if(plane is null)
+        if (plane is null)
             return Result.Failure<string>(SubscriptionPlanError.NotFound);
 
         var isExistsMembership = await _context.Memberships.AnyAsync(x => x.MemberId == member.Id && x.PlanId == planeId, cancellation);
 
-        if(isExistsMembership)
+        if (isExistsMembership)
             return Result.Failure<string>(MembershipErrors.AlreadyExists);
 
 
         bool supportsAutoRenewal = plane.SupportsAutoRenewal && autoRenew;
 
-      var  result = await CreateSubscribe(member.Id, 
-          plane.Id, plane.DurationInDays,
-          supportsAutoRenewal, plane.Price, 
-          plane.Name, cancellation);
+        var result = await CreateSubscribe(member.Id,
+            plane.Id, plane.DurationInDays,
+            supportsAutoRenewal, plane.Price,
+            plane.Name, cancellation);
 
 
         return result.IsSuccess
@@ -55,10 +55,10 @@ public class MembershipService(ApplicationDbContext context) : IMembershipServic
         if (membership is null)
             return Result.Failure<string>(SubscriptionPlanError.NotFound);
 
-        var payment = await _context.Payments.SingleOrDefaultAsync(x=>x.MembershipId==membership.Id);
+        var payment = await _context.Payments.SingleOrDefaultAsync(x => x.MembershipId == membership.Id);
 
         if (payment is null)
-            return Result.Failure<string>(new Error("payment not found", "payment not found",StatusCodes.Status404NotFound));
+            return Result.Failure<string>(new Error("payment not found", "payment not found", StatusCodes.Status404NotFound));
 
         SessionService service = new();
         Session session = service.Get(payment.SessionId);
@@ -69,7 +69,7 @@ public class MembershipService(ApplicationDbContext context) : IMembershipServic
         await _context.SaveChangesAsync();
         return Result.Success(" success subscribe");
     }
-    private async Task<Result<string>>CreateSubscribe(int memberId,int planeId, int planeDurationInDays, bool autoRenew,decimal planePrice,string planeName, CancellationToken cancellation=default)
+    private async Task<Result<string>> CreateSubscribe(int memberId, int planeId, int planeDurationInDays, bool autoRenew, decimal planePrice, string planeName, CancellationToken cancellation = default)
     {
         int durationDays = planeDurationInDays;
         decimal finalPrice = planePrice;
@@ -89,7 +89,7 @@ public class MembershipService(ApplicationDbContext context) : IMembershipServic
             StartDate = DateTime.Now,
             EndDate = endDate,
             AutoRenew = autoRenew,
-            Status = MembershipStatus.Paused
+            Status = MembershipStatus.Active
         };
 
         await _context.AddAsync(membership, cancellation);
@@ -132,5 +132,42 @@ public class MembershipService(ApplicationDbContext context) : IMembershipServic
         await _context.AddAsync(payment, cancellation);
         await _context.SaveChangesAsync(cancellation);
         return Result.Success(session.Url);
+    }
+
+    public async Task AlertToExpiresMember(string userId,int planeId)
+    {
+        var staff= _context.Staffs
+            .Include(x => x.User)
+            .SingleOrDefault(s=>s.UserId == userId);
+
+        var nextWeek = DateTime.Today.AddDays(5);
+
+        var members = _context.Members
+            .Include(m => m.User)
+            .Include(m => m.Memberships)
+             .Where(m => m.Memberships.Any(ms=>ms.Status==MembershipStatus.Active) &&
+             m.Memberships.Any(ms=>ms.PlanId==planeId))
+            .Where(ms => ms.Memberships
+            .OrderByDescending(ms=>ms.EndDate)
+            .Last().EndDate <= nextWeek)
+            .ToList();
+
+       foreach (var member in members)
+    {
+        var expiredDate=member.Memberships
+            .Last().EndDate.ToString();
+        var placeHolder = new Dictionary<string, string> 
+        {
+            {"{{MemberName}}",member.User.FirstName},
+            {"{{ExpiryDate}}",expiredDate! },
+            {"{{StaffName}}",$"{staff!.User.FirstName} {staff!.User.LastName}" },
+            {"{{PhoneNumber}}",staff.User.PhoneNumber!},
+            {"{{Email}}",staff.User.Email! },
+            {"{{Website}}","https://localhost:7027/api/subscriptionplanes" }
+
+        };
+        var body= _emailBodyBuilder.GetEmailBody(EmailTemplates.AlertMembership, placeHolder);
+        await _emailSender.SendEmailAsync(staff.User.Email!,"Gym Memberships Expire",body);
+    }
     }
 }
