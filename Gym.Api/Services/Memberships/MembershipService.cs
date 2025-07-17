@@ -140,7 +140,7 @@ public class MembershipService(ApplicationDbContext context,
             .Include(x => x.User)
             .SingleOrDefault(s=>s.UserId == userId);
 
-        var nextWeek = DateTime.Today.AddDays(5);
+        var nextWeek = DateTime.Today.AddDays( 5);
 
         var members = _context.Members
             .Include(m => m.User)

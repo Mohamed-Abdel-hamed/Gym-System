@@ -138,4 +138,26 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         await _context.SaveChangesAsync(cancellation);
         return Result.Success();
     }
+    public async Task ReactivateFrozenMemberships()
+    {
+        var memberships =await _context.Memberships
+            .Include(ms=>ms.Freezes)
+            .Where(ms=>ms.Status==MembershipStatus.Freeze)
+            .Where(ms=>ms.Freezes.
+            OrderByDescending(ms=>ms.EndDate)
+            .Last().EndDate<=DateTime.Today)
+            .ToListAsync();
+
+        //foreach ( var membership in memberships)
+        //{
+        //    Console.WriteLine($"{membership.Id} - {membership.Freezes.First().Id} - {membership.Freezes.First().EndDate}");
+        //}
+
+        memberships.ForEach(ms =>
+        {
+            ms.Status = MembershipStatus.Active;
+        });
+
+       await _context.SaveChangesAsync();
+    }
 }
