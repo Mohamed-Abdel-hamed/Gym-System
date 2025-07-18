@@ -41,7 +41,7 @@ public class MembershipsController(IMembershipService _membershipService) : Cont
     public async Task<IActionResult> AlertToExpiresMember([FromRoute] int planeId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        RecurringJob.AddOrUpdate(() =>_membershipService.AlertToExpiresMember(userId, planeId), Cron.Daily);
+        RecurringJob.AddOrUpdate(() =>_membershipService.AlertToExpiresMember(userId, planeId), Cron.Yearly);
         return Ok();
     }
 
