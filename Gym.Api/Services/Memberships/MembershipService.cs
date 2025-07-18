@@ -206,4 +206,14 @@ public class MembershipService(ApplicationDbContext context,
 
         return Result.Success<IEnumerable<ChartItemResponse>>(figures);
     }
+    public Task<int> GetNumberOfActiveMemberships()=> _context.Memberships
+        .Where(m=>m.Status==MembershipStatus.Active &&
+        m.EndDate>=DateTime.Today
+        )
+        .CountAsync();
+    public Task<int> GetNumberOfExpiredMemberships()=> _context.Memberships.
+        Where(m => m.Status == MembershipStatus.Expired &&
+         m.EndDate >= DateTime.Today
+        )
+        .CountAsync();
 }
