@@ -21,4 +21,12 @@ public class AccountsController(IUserService userService) : ControllerBase
 
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        var result = await _userService.ChangePasswordAsync(userId, request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
 }
