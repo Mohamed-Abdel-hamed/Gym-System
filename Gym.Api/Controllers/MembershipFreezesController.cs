@@ -37,7 +37,7 @@ public class MembershipFreezesController(IMembershipFreezeService membershipFree
     public IActionResult ReactivateFrozenMemberships()
     {
          //await _membershipFreezeService.ReactivateFrozenMemberships();
-        RecurringJob.AddOrUpdate(()=> _membershipFreezeService.ReactivateFrozenMemberships(),Cron.Minutely);
+        RecurringJob.AddOrUpdate(()=> _membershipFreezeService.ReactivateFrozenMemberships(),Cron.Yearly);
         return Ok();
     }
 }
