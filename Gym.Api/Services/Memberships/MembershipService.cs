@@ -212,8 +212,6 @@ public class MembershipService(ApplicationDbContext context,
         )
         .CountAsync();
     public Task<int> GetNumberOfExpiredMemberships()=> _context.Memberships.
-        Where(m => m.Status == MembershipStatus.Expired &&
-         m.EndDate >= DateTime.Today
-        )
+        Where(m => m.Status == MembershipStatus.Expired)
         .CountAsync();
 }
