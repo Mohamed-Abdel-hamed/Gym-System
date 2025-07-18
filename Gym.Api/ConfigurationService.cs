@@ -25,6 +25,7 @@ using Hangfire;
 using Gym.Api.Services.Members;
 using Gym.Api.Services.Trainers;
 using Gym.Api.Services.Users;
+using Gym.Api.Services.Reports;
 
 namespace Gym.Api;
 
@@ -73,6 +74,7 @@ public static class ConfigurationService
         services.AddScoped<IMemberSerive, MemberSerive>();
         services.AddScoped<ITrainerService, TrainerService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IReportService,ReportService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
