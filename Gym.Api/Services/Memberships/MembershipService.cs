@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
+using Gym.Api.Contracts.Dashboards;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Persistence;
@@ -169,5 +170,40 @@ public class MembershipService(ApplicationDbContext context,
         var body= _emailBodyBuilder.GetEmailBody(EmailTemplates.AlertMembership, placeHolder);
         await _emailSender.SendEmailAsync(staff.User.Email!,"Gym Memberships Expire",body);
     }
+    }
+
+    public async Task<Result<IEnumerable<ChartItemResponse>>> MembershipsPerDay(DateTime? startDate, DateTime? endDate)
+    {
+        startDate??=DateTime.Today.AddDays(-29);
+        endDate??=DateTime.Today;
+
+        var data = await _context.Memberships
+
+            .Where(m => m.StartDate >= startDate && m.EndDate <= endDate)
+
+            .GroupBy(m => m.StartDate)
+
+            .Select(g => new ChartItemResponse(
+
+                g.Key.Date.ToString("d MMM"),
+                g.Count().ToString()
+
+                ))
+            .ToListAsync();
+
+        List<ChartItemResponse> figures = [];
+
+        for (var day=startDate;day<=endDate; day = day.Value.AddDays(1))
+        {
+            var dayData=data.SingleOrDefault(x=>x.Label==day.Value.ToString("d MMM"));
+
+            var value= dayData is null ?"0":dayData.Value;
+
+            ChartItemResponse chartItem = new(day.Value.ToString("d MMM"),value);
+            figures.Add(chartItem);
+        }
+
+
+        return Result.Success<IEnumerable<ChartItemResponse>>(figures);
     }
 }
