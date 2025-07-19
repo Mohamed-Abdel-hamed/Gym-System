@@ -10,8 +10,8 @@ public class ReportsController(IReportService reportService) : ControllerBase
 {
     private readonly IReportService _reportService = reportService;
 
-    [HttpGet("")]
-    public async Task<IActionResult> DownloadMemberships()
+    [HttpGet("download-excel")]
+    public async Task<IActionResult> DownloadMembershipsExcel()
     {
         var woorkBook = await _reportService.ExportMembershipsToExcel();
 
@@ -19,5 +19,13 @@ public class ReportsController(IReportService reportService) : ControllerBase
         woorkBook.SaveAs (stream);
 
         return File(stream.ToArray(),"application/octet-stream","memberships.xlsx");
+    }
+    [HttpGet("download-pdf")]
+    public async Task<IActionResult> DownloadMembershipsPDF()
+    {
+        var file = await _reportService.ExportMembershipsToPDF();
+
+        //var s= file.ToArray()
+        return File(file, "application/octet-stream", "memberships.pdf");
     }
 }
