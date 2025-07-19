@@ -1,7 +1,10 @@
-﻿namespace Gym.Api.Contracts.Dashboards;
+﻿using Gym.Api.Contracts.Classes;
+
+namespace Gym.Api.Contracts.Dashboards;
 
 public record DashboardSummary
     (
      int NumberOfActiveMemberships,
-     int NumberOfExpiredMemberships
+     int NumberOfExpiredMemberships,
+     IEnumerable<DashboardClassBookingResponse> Classes
     );
