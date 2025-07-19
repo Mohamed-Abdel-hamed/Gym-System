@@ -9,4 +9,5 @@ public interface IReportService
 {
     Task<Result<DashboardSummary>> GetDashboardSummary();
     Task<XLWorkbook> ExportMembershipsToExcel();
+    Task<byte[]> ExportMembershipsToPDF();
 }

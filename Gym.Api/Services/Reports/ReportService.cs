@@ -8,6 +8,8 @@ using Gym.Api.Services.Bookings;
 using Gym.Api.Services.Memberships;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using OpenHtmlToPdf;
+using System.Text;
 
 namespace Gym.Api.Services.Reports;
 
@@ -57,6 +59,56 @@ public class ReportService(ApplicationDbContext context,
         sheet.Format();
         return woorkBook;
 
+    }
+    public async Task<byte[]> ExportMembershipsToPDF()
+    {
+        var memberships = await GetMemberships();
+
+         StringBuilder stringBuilder = new ();
+
+        var filePath = $"{Directory.GetCurrentDirectory()}/templates/report.html";
+
+        var html=File.ReadAllText(filePath);
+
+        html = html.Replace("{{Title}}", "Report")
+            .Replace("{{Header}}", "Memberships");
+
+
+        stringBuilder.AppendLine("<table>");
+        stringBuilder.AppendLine("<thead>");
+        stringBuilder.AppendLine("<tr>");
+        stringBuilder.AppendLine("<th>Start Date</th>");
+        stringBuilder.AppendLine("<th>End Date</th>");
+        stringBuilder.AppendLine("<th>AutoRenewPaid");
+        stringBuilder.AppendLine("<th>Status");
+        stringBuilder.AppendLine("<th>Member</th>");
+        stringBuilder.AppendLine("<th>Plan</th>");
+        stringBuilder.AppendLine("<th>Freezes</th>");
+        stringBuilder.AppendLine("</tr>");
+        stringBuilder.AppendLine("</thead>");
+        stringBuilder.AppendLine("<tbody>");
+
+        foreach (var membership in memberships)
+        {
+            stringBuilder.AppendLine("<tr>");
+            stringBuilder.AppendLine($"<td>{membership.StartDate}</td>");
+            stringBuilder.AppendLine($"<td>{membership.EndDate}</td>");
+            stringBuilder.AppendLine($"<td>{(membership.AutoRenewPaid ? "Yes" : "No")}</td>");
+            stringBuilder.AppendLine($"<td>{membership.Status}</td>");
+            stringBuilder.AppendLine($"<td>{membership.Member}</td>");
+            stringBuilder.AppendLine($"<td>{membership.Plane}</td>");
+            stringBuilder.AppendLine($"<td>{membership.NumberOfFreezes}</td>");
+            stringBuilder.AppendLine("</tr>");
+        }
+        stringBuilder.AppendLine("</tbody>");
+        stringBuilder.AppendLine("</table>");
+
+        html = html.Replace("{{Body}}", stringBuilder.ToString());
+
+        var pdf = Pdf
+            .From(html)
+            .Content();
+        return pdf;
     }
     private async Task<List<ReportMemberShipResponse>> GetMemberships()
     {
