@@ -6,7 +6,6 @@ using Gym.Api.Extensions;
 using Gym.Api.Persistence;
 using Gym.Api.Services.Bookings;
 using Gym.Api.Services.Memberships;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using OpenHtmlToPdf;
 using System.Text;
