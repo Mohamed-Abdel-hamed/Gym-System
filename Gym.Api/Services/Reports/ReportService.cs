@@ -1,13 +1,21 @@
-﻿using Gym.Api.Abstractions;
+﻿using ClosedXML.Excel;
+using Gym.Api.Abstractions;
 using Gym.Api.Contracts.Dashboards;
+using Gym.Api.Contracts.Memberships;
+using Gym.Api.Extensions;
 using Gym.Api.Persistence;
 using Gym.Api.Services.Bookings;
 using Gym.Api.Services.Memberships;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gym.Api.Services.Reports;
 
-public class ReportService(IMembershipService _membershipService,IBookingService bookingService) : IReportService
+public class ReportService(ApplicationDbContext context,
+    IMembershipService _membershipService,
+    IBookingService bookingService) : IReportService
 {
+    private readonly ApplicationDbContext _context = context;
     private readonly IMembershipService _membershipService = _membershipService;
     private readonly IBookingService _bookingService = bookingService;
 
@@ -22,5 +30,52 @@ public class ReportService(IMembershipService _membershipService,IBookingService
         DashboardSummary dashboardSummary=new(numberOfActiveMemberships, numberOfExpiredMemberships,classes);
 
         return Result.Success(dashboardSummary); 
+    }
+    public async Task<XLWorkbook> ExportMembershipsToExcel()
+    {
+        var memberships = await GetMemberships();
+
+        var woorkBook = new XLWorkbook();
+
+      var sheet=  woorkBook.AddWorksheet("Memberships");
+
+        string[] headerCells = { "StartDate" , "EndDate", "AutoRenewPaid" , "Status" , "Member", "Plane", "Freezes" }; 
+
+        sheet.AddHeader(headerCells);
+
+        for (int i = 0; i < memberships.Count; i++)
+        {
+            sheet.Cell(i + 2, 1).SetValue(memberships[i].StartDate);
+            sheet.Cell(i + 2, 2).SetValue(memberships[i].EndDate);
+            sheet.Cell(i + 2, 3).SetValue(memberships[i].AutoRenewPaid? "Yes": "No");
+            sheet.Cell(i + 2, 4).SetValue(memberships[i].Status);
+            sheet.Cell(i + 2, 5).SetValue(memberships[i].Member);
+            sheet.Cell(i + 2, 6).SetValue(memberships[i].Plane);
+            sheet.Cell(i + 2, 7).SetValue(memberships[i].NumberOfFreezes);
+        }
+
+        sheet.Format();
+        return woorkBook;
+
+    }
+    private async Task<List<ReportMemberShipResponse>> GetMemberships()
+    {
+        var memberships = await _context.Memberships
+           .AsNoTracking()
+           .Include(ms => ms.Plan)
+           .Include(ms => ms.Freezes)
+           .Include(ms => ms.Member)
+           .ThenInclude(m => m.User)
+           .Select(ms => new ReportMemberShipResponse(
+                    ms.StartDate.ToString("d"),
+                    (ms.EndDate ?? DateTime.MinValue).ToString("d"),
+                    ms.AutoRenewPaid,
+                    ms.Status.ToString(),
+                    $"{ms.Member.User.FirstName} {ms.Member.User.LastName}",
+                    ms.Plan.Name,
+                    ms.Freezes.Count
+                   ))
+               .ToListAsync();
+        return memberships;
     }
 }
