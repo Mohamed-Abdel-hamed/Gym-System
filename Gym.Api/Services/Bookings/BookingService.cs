@@ -1,10 +1,11 @@
-﻿using Gym.Api.Abstractions;
+﻿using FluentValidation.Validators;
+using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
+using Gym.Api.Contracts.Classes;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace Gym.Api.Services.Bookings;
 
@@ -31,6 +32,7 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         if (targetClass.StartDate <= DateTime.Now)
             return Result.Failure(ClassErrors.AlreadyStarted);
 
+
         var isExistsBooking= await _context.Bookings.AnyAsync(x=>x.MemberId==member.Id&&x.ClassId==classId, cancellation);
 
         if(isExistsBooking)
@@ -54,7 +56,49 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         await _context.Bookings.AddAsync(booking,cancellation);
 
         await _context.SaveChangesAsync(cancellation);
-
         return Result.Success();
     }
+
+    public async Task<IEnumerable<DashboardClassBookingResponse>> GetClassesWithHighestNumberOfBookings()
+    {
+        var startDate = DateTime.Today.AddDays(-29);
+
+        var totalDays = (DateTime.Today - startDate).TotalDays;
+
+        var classes = await _context.Bookings
+
+            .AsNoTracking()
+
+            .Where(b => b.CreatedDate >= startDate && b.CreatedDate <= DateTime.Today)
+
+            .GroupBy(b => new { b.ClassId })
+
+            .Select(g => new
+            {
+                g.Key.ClassId,
+                BookingsAverage = Math.Round(g.Count() / totalDays,2)
+            })
+
+             .OrderByDescending(g => g.BookingsAverage) 
+
+            .Take(5)
+
+            .Join(_context.Classes,
+
+            b => b.ClassId,
+
+            c => c.Id,
+
+            (b, c) => new DashboardClassBookingResponse(
+                c.Id,
+                c.Title,
+                c.StartDate,
+                c.Capacity,
+                b.BookingsAverage
+            ))
+            .ToListAsync();
+
+        return classes;
+    }
+
 }
