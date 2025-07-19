@@ -1,12 +1,14 @@
 ﻿using Gym.Api.Abstractions;
+using Gym.Api.Abstractions.Consts;
 using Gym.Api.Services.Memberships;
 using Gym.Api.Services.Reports;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gym.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles =AppRoles.Admin)]  
 public class DashboardController(IMembershipService membershipService,
     IReportService reportService) : ControllerBase
 {
