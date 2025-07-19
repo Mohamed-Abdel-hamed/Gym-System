@@ -29,7 +29,6 @@ public class ReportsController(IReportService reportService) : ControllerBase
     {
         var file = await _reportService.ExportMembershipsToPDF();
 
-        //var s= file.ToArray()
         return File(file, "application/octet-stream", "memberships.pdf");
     }
 }
