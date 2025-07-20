@@ -2,6 +2,7 @@
 using Gym.Api.Contracts.Authentications;
 using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
+using Gym.Api.Contracts.Users;
 using Gym.Api.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,5 +61,12 @@ public class AuthsController(IAuthService authService) : ControllerBase
     {
         var result=await _authService.SendResetPasswordAsync(request);
         return result.IsSuccess? Ok() : result.ToProblem();
+    }
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+
+        var authResult = await _authService.ResetPasswordAsync(request);
+        return authResult.IsSuccess ? Ok() : authResult.ToProblem();
     }
 }

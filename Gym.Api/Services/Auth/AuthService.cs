@@ -228,13 +228,33 @@ public class AuthService(ApplicationDbContext context,
         };
 
         var emailBody = _emailBodyBuilder.GetEmailBody
-            (EmailTemplates.EmailConfirmation, placeHolder);
+            (EmailTemplates.ForgetPassword, placeHolder);
 
         BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Gym System Change Password", emailBody));
       await  Task.CompletedTask;
     }
 
+    public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        if (await _userManager.FindByEmailAsync(request.Email) is not { } user || !user.EmailConfirmed)
+            return Result.Failure(UserErrors.InvalidCredentials);
 
+        IdentityResult result;
+        try
+        {
+            var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+            result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+        }
+        catch (FormatException)
+        {
+            result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+        }
+        if (result.Succeeded)
+            return Result.Success();
+        var error = result.Errors.First();
+
+        return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
+    }
     private async Task<Result> CheckUserUniquenessAsync(string email, string phoneNumber, CancellationToken cancellation)
     {
         if (await _userManager.Users.AnyAsync(x => x.Email == email, cancellation))

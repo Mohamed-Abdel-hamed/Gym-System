@@ -2,6 +2,7 @@
 using Gym.Api.Contracts.Authentications;
 using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
+using Gym.Api.Contracts.Users;
 
 namespace Gym.Api.Services.Auth;
 
@@ -14,4 +15,5 @@ public interface IAuthService
     Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
     Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request);
     Task<Result> SendResetPasswordAsync(ForgetPasswordRequest request);
+    Task<Result> ResetPasswordAsync(ResetPasswordRequest request);
 }
