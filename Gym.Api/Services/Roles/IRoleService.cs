@@ -6,4 +6,5 @@ namespace Gym.Api.Services.Roles;
 public interface IRoleService
 {
     Task<Result<IEnumerable<RoleResponse>>> GetAllAsync();
+    Task<Result<RoleResponse>> GetAsync(string roleId);
 }

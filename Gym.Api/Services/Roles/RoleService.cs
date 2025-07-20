@@ -22,5 +22,20 @@ public class RoleService(RoleManager<IdentityRole> roleManager) : IRoleService
         return Result.Success<IEnumerable<RoleResponse>>(roles);
 
     }
+    public async Task<Result<RoleResponse>> GetAsync(string roleId)
+    {
+        var role = await _roleManager.Roles
+              .AsNoTracking()
+              .SingleOrDefaultAsync(r=>r.Id==roleId);
+
+
+        if (role is null)
+            return Result.Failure<RoleResponse>(RoleErrors.NotFound);
+
+        var response = role.Adapt<RoleResponse>();
+
+        return Result.Success(response);
+
+    }
 
 }
