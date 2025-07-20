@@ -224,7 +224,7 @@ public class AuthService(ApplicationDbContext context,
         var placeHolder = new Dictionary<string, string>
         {
             {"{{name}}",user.FirstName},
-            {"{{action_url}}",$"{origin}/auth/forgetPassword?email={user.Id}&code={token}"},
+            {"{{ConfirmLink}}",$"{origin}/auth/forgetPassword?email={user.Id}&code={token}"},
         };
 
         var emailBody = _emailBodyBuilder.GetEmailBody
