@@ -26,6 +26,7 @@ using Gym.Api.Services.Members;
 using Gym.Api.Services.Trainers;
 using Gym.Api.Services.Users;
 using Gym.Api.Services.Reports;
+using Gym.Api.Services.Roles;
 
 namespace Gym.Api;
 
@@ -75,6 +76,7 @@ public static class ConfigurationService
         services.AddScoped<ITrainerService, TrainerService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IReportService,ReportService>();
+        services.AddScoped<IRoleService, RoleService>();
         return services;
     }
     public static IServiceCollection AddIdentityConfig(this IServiceCollection services, IConfiguration configuration)
