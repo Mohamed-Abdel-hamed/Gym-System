@@ -18,4 +18,11 @@ public class RolesController(IRoleService roleService) : ControllerBase
         
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
+    [HttpGet("{roleId}")]
+    public async Task<IActionResult> Get(string roleId)
+    {
+        var result = await _roleService.GetAsync(roleId);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
 }
