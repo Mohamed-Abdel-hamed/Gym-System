@@ -13,4 +13,5 @@ public interface IAuthService
     Task<Result> RegisterStaffAsync(RegisterStaffRequest request, CancellationToken cancellation = default);
     Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
     Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request);
+    Task<Result> SendResetPasswordAsync(ForgetPasswordRequest request);
 }

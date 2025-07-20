@@ -1,10 +1,12 @@
 ﻿using Azure.Core;
+using DocumentFormat.OpenXml.Drawing;
 using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
 using Gym.Api.Authentications;
 using Gym.Api.Contracts.Authentications;
 using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
+using Gym.Api.Contracts.Users;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
 using Gym.Api.Helper;
@@ -182,6 +184,22 @@ public class AuthService(ApplicationDbContext context,
 
         return Result.Success();
     }
+
+    public async Task<Result> SendResetPasswordAsync (ForgetPasswordRequest request)
+    {
+        if (await _userManager.FindByEmailAsync(request.Email) is not { } user  )
+            return Result.Success();
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        _logger.LogInformation("Reset Token,{token}", token);
+
+        await SendResetPasswordEmail(user, token);
+        return Result.Success();
+    }
+
     private async Task SendConfirmationEmail(ApplicationUser user, string token)
     {
         var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
@@ -198,6 +216,22 @@ public class AuthService(ApplicationDbContext context,
         BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Gym System Confirmation Email", emailBody));
 
         await Task.CompletedTask;
+    }
+    private async Task SendResetPasswordEmail(ApplicationUser user, string token)
+    {
+        var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+        var placeHolder = new Dictionary<string, string>
+        {
+            {"{{name}}",user.FirstName},
+            {"{{action_url}}",$"{origin}/auth/forgetPassword?email={user.Id}&code={token}"},
+        };
+
+        var emailBody = _emailBodyBuilder.GetEmailBody
+            (EmailTemplates.EmailConfirmation, placeHolder);
+
+        BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "Gym System Change Password", emailBody));
+      await  Task.CompletedTask;
     }
 
 
