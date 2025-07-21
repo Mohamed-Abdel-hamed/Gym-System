@@ -48,7 +48,7 @@ public static class ConfigurationService
 
         services.AddProblemDetails();
 
-
+        services.AddHealthChecks();
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)

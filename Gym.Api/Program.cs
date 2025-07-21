@@ -52,4 +52,5 @@ await DefaultUser.SeedAdminUserAsync(userManger);
 app.MapControllers();
 app.UseExceptionHandler();
 
+app.MapHealthChecks("health");
 app.Run();
