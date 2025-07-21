@@ -37,5 +37,20 @@ public class RoleService(RoleManager<IdentityRole> roleManager) : IRoleService
         return Result.Success(response);
 
     }
+    public async Task<Result> AddAsync(RoleRequest request)
+    {
+       var isExists=await _roleManager.RoleExistsAsync(request.Name);
+
+        if(isExists)
+            return Result.Failure(RoleErrors.DuplicatedRole);
+        var result = await _roleManager.CreateAsync(new IdentityRole { Name = request.Name });
+
+        if(result.Succeeded)
+        return Result.Success(result);
+
+        var error= result.Errors.First();
+
+        return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+    }
 
 }
