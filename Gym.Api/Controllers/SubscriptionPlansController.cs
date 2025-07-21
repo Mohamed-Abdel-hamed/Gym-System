@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
+using Gym.Api.Contracts.Common;
 using Gym.Api.Contracts.SubscriptionPlans;
 using Gym.Api.Entities;
 using Gym.Api.Services.SubscriptionPlans;
@@ -15,9 +16,9 @@ public class SubscriptionPlansController(ISubscriptionPlanService planService) :
     private readonly ISubscriptionPlanService _planService = planService;
 
     [HttpGet("")]
-    public async Task<IActionResult> GetAll(CancellationToken cancellation)
+    public async Task<IActionResult> GetAll([FromQuery]RequestFilter filter, CancellationToken cancellation)
     {
-       var result= await _planService.GetAllAsync(cancellation);
+       var result= await _planService.GetAllAsync(filter,cancellation);
         return result.IsSuccess? Ok(result.Value):result.ToProblem();
 
     }

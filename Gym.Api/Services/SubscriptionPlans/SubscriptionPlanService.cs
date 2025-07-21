@@ -1,4 +1,5 @@
 ﻿using Gym.Api.Abstractions;
+using Gym.Api.Contracts.Common;
 using Gym.Api.Contracts.SubscriptionPlans;
 using Gym.Api.Entities;
 using Gym.Api.Errors;
@@ -12,7 +13,7 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<Result<IEnumerable<SubscriptionPlanResponse>>> GetAllAsync(CancellationToken cancellation = default)
+  /*  public async Task<Result<IEnumerable<SubscriptionPlanResponse>>> GetAllAsync(CancellationToken cancellation = default)
     {
        var subscriptionPlans = await _context.SubscriptionPlans
             .AsNoTracking()
@@ -23,6 +24,20 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 
             return Result.Failure<IEnumerable<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
         return Result.Success<IEnumerable<SubscriptionPlanResponse>>(subscriptionPlans);
+    }*/
+    public async Task<Result<PaginatedList<SubscriptionPlanResponse>>> GetAllAsync(RequestFilter filter,CancellationToken cancellation = default)
+    {
+        var query =  _context.SubscriptionPlans
+             .AsNoTracking()
+             .ProjectToType<SubscriptionPlanResponse>();
+
+        if (!query.Any())
+
+            return Result.Failure<PaginatedList<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
+
+        var subscriptionPlans =await PaginatedList<SubscriptionPlanResponse> .CreateASync(query,filter.PageNumber,filter.PageSize,cancellation);
+
+        return Result.Success(subscriptionPlans);
     }
     public async Task<Result> AddAsync(SubscriptionPlanRequest request, CancellationToken cancellation = default)
     {
