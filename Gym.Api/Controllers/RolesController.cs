@@ -1,5 +1,6 @@
 ﻿using Gym.Api.Abstractions;
 using Gym.Api.Abstractions.Consts;
+using Gym.Api.Contracts.Roles;
 using Gym.Api.Services.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,5 +25,12 @@ public class RolesController(IRoleService roleService) : ControllerBase
         var result = await _roleService.GetAsync(roleId);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+    [HttpPost("")]
+    public async Task<IActionResult> Add(RoleRequest request)
+    {
+        var result = await _roleService.AddAsync(request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
     }
 }
