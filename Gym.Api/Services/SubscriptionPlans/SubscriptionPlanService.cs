@@ -13,18 +13,6 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 {
     private readonly ApplicationDbContext _context = context;
 
-  /*  public async Task<Result<IEnumerable<SubscriptionPlanResponse>>> GetAllAsync(CancellationToken cancellation = default)
-    {
-       var subscriptionPlans = await _context.SubscriptionPlans
-            .AsNoTracking()
-            .ProjectToType<SubscriptionPlanResponse>()
-            .ToListAsync(cancellation);
-
-        if (subscriptionPlans.Count == 0)
-
-            return Result.Failure<IEnumerable<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
-        return Result.Success<IEnumerable<SubscriptionPlanResponse>>(subscriptionPlans);
-    }*/
     public async Task<Result<PaginatedList<SubscriptionPlanResponse>>> GetAllAsync(RequestFilter filter,CancellationToken cancellation = default)
     {
         var query = _context.SubscriptionPlans
