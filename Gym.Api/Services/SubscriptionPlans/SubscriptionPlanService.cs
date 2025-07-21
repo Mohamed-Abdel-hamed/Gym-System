@@ -6,16 +6,26 @@ using Gym.Api.Errors;
 using Gym.Api.Persistence;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Dynamic.Core;
 
 namespace Gym.Api.Services.SubscriptionPlans;
 
-public class SubscriptionPlanService(ApplicationDbContext context) : ISubscriptionPlanService
+public class SubscriptionPlanService(ApplicationDbContext context,IMemoryCache memoryCache) : ISubscriptionPlanService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly IMemoryCache _memoryCache = memoryCache;
+    private const string _cachePrefix = "AllPlans";
+    private static readonly HashSet<string> _subscriptionCacheKeys = new();
+
 
     public async Task<Result<PaginatedList<SubscriptionPlanResponse>>> GetAllAsync(RequestFilter filter,CancellationToken cancellation = default)
     {
+
+        var cacheKey = $"{_cachePrefix}_{filter.PageNumber}_{filter.PageSize}_{filter.SearchValue}_{filter.SortColumn}_{filter.SortDirection}";
+
+        _subscriptionCacheKeys.Add(cacheKey);
+
         var query = _context.SubscriptionPlans
         .AsNoTracking()
         .Where(sp =>
@@ -38,7 +48,19 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 
         var source=query.ProjectToType<SubscriptionPlanResponse>();
 
-        var subscriptionPlans =await PaginatedList<SubscriptionPlanResponse> .CreateASync(source,filter.PageNumber,filter.PageSize,cancellation);
+        var data = await PaginatedList<SubscriptionPlanResponse> .CreateASync(source,filter.PageNumber,filter.PageSize,cancellation);
+
+      var subscriptionPlans = await _memoryCache.GetOrCreateAsync(cacheKey,
+           cach =>
+           {
+               cach.SlidingExpiration = TimeSpan.FromMinutes(5);
+               return  Task.FromResult(data);
+           }
+          );
+
+        if (subscriptionPlans is null)
+            return Result.Failure<PaginatedList<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
+
 
         return Result.Success(subscriptionPlans);
     }
@@ -54,6 +76,11 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
         await _context.SubscriptionPlans.AddAsync(subscriptionPlan,cancellation);
         await _context.SaveChangesAsync(cancellation);
 
+        foreach (var key in _subscriptionCacheKeys)
+        {
+            _memoryCache.Remove(key);
+        }
+        _subscriptionCacheKeys.Clear();
         return Result.Success();
     }
     public async Task<Result> UpdateAsync(int id,SubscriptionPlanRequest request, CancellationToken cancellation = default)
@@ -75,6 +102,12 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 
         await _context.SaveChangesAsync(cancellation);
 
+        foreach (var key in _subscriptionCacheKeys)
+        {
+            _memoryCache.Remove(key);
+        }
+        _subscriptionCacheKeys.Clear();
+
         return Result.Success();
     }
     public async Task<Result> DeleteAsync(int id, CancellationToken cancellation = default)
@@ -89,6 +122,12 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
 
 
         await _context.SaveChangesAsync(cancellation);
+
+        foreach (var key in _subscriptionCacheKeys)
+        {
+            _memoryCache.Remove(key);
+        }
+        _subscriptionCacheKeys.Clear();
 
         return Result.Success();
     }
