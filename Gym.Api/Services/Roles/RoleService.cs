@@ -52,5 +52,27 @@ public class RoleService(RoleManager<IdentityRole> roleManager) : IRoleService
 
         return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
     }
+    public async Task<Result> UpdateAsync(string roleId,RoleRequest request)
+    {
+
+        var isExists = await _roleManager.Roles.AnyAsync(r=>r.Name==request.Name && r.Id!=roleId);
+
+        if (isExists)
+            return Result.Failure(RoleErrors.DuplicatedRole);
+
+        if(await _roleManager.FindByIdAsync(roleId) is not { } role)
+            return Result.Failure(RoleErrors.NotFound);
+
+        role.Name = request.Name;
+
+        var result = await _roleManager.UpdateAsync(role);
+
+        if (result.Succeeded)
+            return Result.Success(result);
+
+        var error = result.Errors.First();
+
+        return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+    }
 
 }
