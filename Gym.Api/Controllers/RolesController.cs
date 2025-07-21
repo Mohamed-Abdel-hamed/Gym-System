@@ -33,4 +33,11 @@ public class RolesController(IRoleService roleService) : ControllerBase
 
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
+    [HttpPut("{roleId}")]
+    public async Task<IActionResult> Update(string roleId,RoleRequest request)
+    {
+        var result = await _roleService.UpdateAsync(roleId,request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
 }
