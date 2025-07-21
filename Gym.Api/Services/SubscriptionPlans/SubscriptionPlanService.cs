@@ -27,9 +27,12 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
     }*/
     public async Task<Result<PaginatedList<SubscriptionPlanResponse>>> GetAllAsync(RequestFilter filter,CancellationToken cancellation = default)
     {
-        var query =  _context.SubscriptionPlans
-             .AsNoTracking()
-             .ProjectToType<SubscriptionPlanResponse>();
+        var query = _context.SubscriptionPlans
+    .AsNoTracking()
+    .Where(sp =>
+        string.IsNullOrEmpty(filter.SearchValue) ||
+        sp.Name.ToLower().Contains(filter.SearchValue.ToLower()))
+    .ProjectToType<SubscriptionPlanResponse>();
 
         if (!query.Any())
 
