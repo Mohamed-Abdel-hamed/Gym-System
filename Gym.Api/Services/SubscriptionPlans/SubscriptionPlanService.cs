@@ -6,6 +6,7 @@ using Gym.Api.Errors;
 using Gym.Api.Persistence;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace Gym.Api.Services.SubscriptionPlans;
 
@@ -16,17 +17,28 @@ public class SubscriptionPlanService(ApplicationDbContext context) : ISubscripti
     public async Task<Result<PaginatedList<SubscriptionPlanResponse>>> GetAllAsync(RequestFilter filter,CancellationToken cancellation = default)
     {
         var query = _context.SubscriptionPlans
-    .AsNoTracking()
-    .Where(sp =>
-        string.IsNullOrEmpty(filter.SearchValue) ||
-        sp.Name.ToLower().Contains(filter.SearchValue.ToLower()))
-    .ProjectToType<SubscriptionPlanResponse>();
+        .AsNoTracking()
+        .Where(sp =>
+
+            string.IsNullOrEmpty(filter.SearchValue) ||
+
+            sp.Name.ToLower().Contains(filter.SearchValue.ToLower()));
 
         if (!query.Any())
 
             return Result.Failure<PaginatedList<SubscriptionPlanResponse>>(SubscriptionPlanError.NotFound);
 
-        var subscriptionPlans =await PaginatedList<SubscriptionPlanResponse> .CreateASync(query,filter.PageNumber,filter.PageSize,cancellation);
+        
+
+        if (!string.IsNullOrEmpty(filter.SortColumn))
+        {
+            query = query.OrderBy($"{filter.SortColumn} {filter.SortDirection}");
+        }
+
+
+        var source=query.ProjectToType<SubscriptionPlanResponse>();
+
+        var subscriptionPlans =await PaginatedList<SubscriptionPlanResponse> .CreateASync(source,filter.PageNumber,filter.PageSize,cancellation);
 
         return Result.Success(subscriptionPlans);
     }
