@@ -5,6 +5,7 @@ using Gym.Api.Services.Classes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Gym.Api.Controllers;
 [Route("api/[controller]")]
@@ -15,6 +16,7 @@ public class ClassesController(IClassService classService) : ControllerBase
     private readonly IClassService _classService = classService;
 
     [HttpPost("trainer/{trainerId}")]
+    [EnableRateLimiting("token")]
     public async Task<IActionResult> Add([FromRoute]int trainerId,[FromBody] ClassRequest request,CancellationToken cancellation=default)
     {
         var result = await _classService.AddAsync(trainerId, request, cancellation);

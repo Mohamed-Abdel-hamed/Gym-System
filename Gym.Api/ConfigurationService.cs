@@ -27,6 +27,8 @@ using Gym.Api.Services.Trainers;
 using Gym.Api.Services.Users;
 using Gym.Api.Services.Reports;
 using Gym.Api.Services.Roles;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 namespace Gym.Api;
 
@@ -39,7 +41,8 @@ public static class ConfigurationService
             .AddServicesConfig()
             .AddMapsterConfig()
             .AddFluentValidationConfig()
-            .AddHangfireConfig(configuration);
+            .AddHangfireConfig(configuration)
+            .RateLimitingConfig();
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
         services.Configure<StripeSettings>(configuration.GetSection("stripe"));
@@ -150,6 +153,25 @@ public static class ConfigurationService
 
         // Add the processing server as IHostedService
         services.AddHangfireServer();
+        return services;
+    }
+    private static IServiceCollection RateLimitingConfig(this IServiceCollection services)
+    {
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            rateLimiterOptions.AddTokenBucketLimiter("token", options =>
+            {
+                options.TokenLimit = 2;
+                options.QueueLimit = 1;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+                options.TokensPerPeriod = 2;
+                options.AutoReplenishment = true;
+            });
+        });
+            
+
         return services;
     }
 }
