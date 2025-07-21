@@ -42,6 +42,9 @@ app.UseHangfireDashboard("/jobs",new DashboardOptions
       DashboardTitle = "Gym Management Jobs"
 });
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("stripe:Secretkey").Get<string>();
+
+
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
 var scopeFactory=app.Services.GetRequiredService<IServiceScopeFactory>();

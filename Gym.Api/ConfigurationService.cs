@@ -44,6 +44,15 @@ public static class ConfigurationService
             .AddHangfireConfig(configuration)
             .RateLimitingConfig()
             .AddSwagerConfig();
+        services.AddCors(optoins =>
+        {
+            optoins.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+                builder.WithOrigins("http://localhost:500");
+            });
+        });
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
         services.Configure<StripeSettings>(configuration.GetSection("stripe"));
