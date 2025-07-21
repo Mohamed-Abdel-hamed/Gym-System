@@ -4,6 +4,8 @@ using Gym.Api.Persistence;
 using Gym.Api.Seeds;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Stripe;
@@ -52,5 +54,8 @@ await DefaultUser.SeedAdminUserAsync(userManger);
 app.MapControllers();
 app.UseExceptionHandler();
 
-app.MapHealthChecks("health");
+app.MapHealthChecks("health",new HealthCheckOptions
+{
+    ResponseWriter=UIResponseWriter.WriteHealthCheckUIResponse
+});
 app.Run();
