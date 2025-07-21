@@ -13,6 +13,9 @@ public static class UserErrors
     public static readonly Error LockedUser =
         new("User.LockedUser", "Locked user, please contact your administrator", StatusCodes.Status401Unauthorized);
 
+    public static readonly Error LockedNotUser =
+    new("User.LockedNotUser", "Not Locked user, user not lock ", StatusCodes.Status400BadRequest);
+
     public static readonly Error InvalidJwtToken =
         new("User.InvalidJwtToken", "Invalid Jwt token", StatusCodes.Status401Unauthorized);
 
