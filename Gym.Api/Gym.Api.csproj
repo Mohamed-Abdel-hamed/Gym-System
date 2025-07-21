@@ -26,6 +26,7 @@
     <PackageReference Include="OpenHtmlToPdf.netcore" Version="1.13.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Stripe.net" Version="48.3.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
   </ItemGroup>
 
 </Project>
