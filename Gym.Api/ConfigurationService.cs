@@ -42,7 +42,8 @@ public static class ConfigurationService
             .AddMapsterConfig()
             .AddFluentValidationConfig()
             .AddHangfireConfig(configuration)
-            .RateLimitingConfig();
+            .RateLimitingConfig()
+            .AddSwagerConfig();
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
         services.Configure<StripeSettings>(configuration.GetSection("stripe"));
@@ -140,6 +141,14 @@ public static class ConfigurationService
         services
             .AddFluentValidationAutoValidation()
             .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        return services;
+    }
+    private static IServiceCollection AddSwagerConfig(this IServiceCollection services)
+    {
+        services
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen();
 
         return services;
     }
