@@ -1,4 +1,5 @@
 ﻿using Gym.Api.Contracts.Authentications;
+using Gym.Api.Contracts.Bookings;
 using Gym.Api.Contracts.Classes;
 using Gym.Api.Contracts.Staffs;
 using Gym.Api.Contracts.Trainers;
@@ -30,6 +31,10 @@ public class MappingMappingConfigurations : IRegister
 
         config.NewConfig<Trainer, TrainerResponse>()
             .Map(dest => dest.Classes, src => src.ClassesTaught);
+
+        config.NewConfig<Booking, BookingResponse>()
+    .Map(dest => dest.Status, src => src.Status.ToString());
+
 
     }
 }
