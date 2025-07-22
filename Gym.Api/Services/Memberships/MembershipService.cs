@@ -135,42 +135,6 @@ public class MembershipService(ApplicationDbContext context,
         return Result.Success(session.Url);
     }
 
-    public async Task AlertToExpiresMember(string userId,int planeId)
-    {
-        var staff= _context.Staffs
-            .Include(x => x.User)
-            .SingleOrDefault(s=>s.UserId == userId);
-
-        var nextWeek = DateTime.Today.AddDays( 5);
-
-        var members = _context.Members
-            .Include(m => m.User)
-            .Include(m => m.Memberships)
-             .Where(m => m.Memberships.Any(ms=>ms.Status==MembershipStatus.Active) &&
-             m.Memberships.Any(ms=>ms.PlanId==planeId))
-            .Where(ms => ms.Memberships
-            .OrderByDescending(ms=>ms.EndDate)
-            .Last().EndDate <= nextWeek)
-            .ToList();
-
-       foreach (var member in members)
-    {
-        var expiredDate=member.Memberships
-            .Last().EndDate.ToString();
-        var placeHolder = new Dictionary<string, string> 
-        {
-            {"{{MemberName}}",member.User.FirstName},
-            {"{{ExpiryDate}}",expiredDate! },
-            {"{{StaffName}}",$"{staff!.User.FirstName} {staff!.User.LastName}" },
-            {"{{PhoneNumber}}",staff.User.PhoneNumber!},
-            {"{{Email}}",staff.User.Email! },
-            {"{{Website}}","https://localhost:7027/api/subscriptionplanes" }
-
-        };
-        var body= _emailBodyBuilder.GetEmailBody(EmailTemplates.AlertMembership, placeHolder);
-        await _emailSender.SendEmailAsync(staff.User.Email!,"Gym Memberships Expire",body);
-    }
-    }
 
     public async Task<Result<IEnumerable<ChartItemResponse>>> MembershipsPerDay(DateTime? startDate, DateTime? endDate)
     {
