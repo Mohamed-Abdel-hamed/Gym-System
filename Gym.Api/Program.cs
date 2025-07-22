@@ -1,14 +1,19 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Gym.Api;
 using Gym.Api.Entities;
 using Gym.Api.Persistence;
 using Gym.Api.Seeds;
+using Gym.Api.Services.Email;
+using Gym.Api.Tasks;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Serilog;
 using Stripe;
+using System.Numerics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +64,8 @@ await DefaultRoles.SeedAsync(roleManger);
 await DefaultUser.SeedAdminUserAsync(userManger);
 
 
+
+
 app.MapControllers();
 app.UseExceptionHandler();
 app.UseRateLimiter();
@@ -66,4 +73,15 @@ app.MapHealthChecks("health",new HealthCheckOptions
 {
     ResponseWriter=UIResponseWriter.WriteHealthCheckUIResponse
 });
+
+var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+var emailBuilder= scope.ServiceProvider.GetRequiredService<IEmailBodyBuilder>();
+
+var emailSender= scope.ServiceProvider.GetRequiredService<IEmailSender>();
+
+var tasks = new HangfireTasks(dbContext, emailBuilder, emailSender);
+
+RecurringJob.AddOrUpdate(() => tasks.AlertToExpiresMember(), Cron.Yearly);
+
 app.Run();
