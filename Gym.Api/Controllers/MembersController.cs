@@ -2,6 +2,7 @@
 using Gym.Api.Abstractions.Consts;
 using Gym.Api.Services.Members;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,12 +24,20 @@ public class MembersController(IMemberSerive memberSerive) : ControllerBase
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Details(int id,CancellationToken cancellation = default)
+    [HttpGet("{key}")]
+    public async Task<IActionResult> Details(string key,CancellationToken cancellation = default)
     {
 
-        var result = await _memberSerive.DetailsAsync(id, cancellation);
+        var result = await _memberSerive.DetailsAsync(key, cancellation);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+    [HttpGet("{name}-search")]
+    public async Task<IActionResult> Serach(string name, CancellationToken cancellation = default)
+    {
+
+        var result = await _memberSerive.SearchAsync(name, cancellation);
+
+        return result.IsSuccess ? RedirectToAction(nameof(Details), new { key = result.Value } ) : result.ToProblem();
     }
 }

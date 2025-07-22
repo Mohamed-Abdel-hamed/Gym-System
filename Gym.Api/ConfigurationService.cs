@@ -29,7 +29,7 @@ using Gym.Api.Services.Reports;
 using Gym.Api.Services.Roles;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Gym.Api;
 
@@ -66,6 +66,9 @@ public static class ConfigurationService
            .AddDbContextCheck<ApplicationDbContext>("database");
 
         services.AddMemoryCache();
+
+        services.AddDataProtection().SetApplicationName(nameof(Gym));
+
         return services;
     }
     public static IServiceCollection AddDbContextConfig(this IServiceCollection services,IConfiguration configuration)
