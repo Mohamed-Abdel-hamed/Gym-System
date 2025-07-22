@@ -9,17 +9,25 @@ using System.Security.Claims;
 namespace Gym.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles =AppRoles.Member)]
 public class MembersController(IMemberSerive memberSerive) : ControllerBase
 {
     private readonly IMemberSerive _memberSerive = memberSerive;
 
+    [Authorize(Roles = AppRoles.Member)]
     [HttpGet("")]
     public async Task<IActionResult> Get(CancellationToken cancellation=default)
     {
         var userId=User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-        var result = await _memberSerive.GetAsync(userId,cancellation);
+        var result = await _memberSerive.GetAsync(userId, cancellation);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Details(int id,CancellationToken cancellation = default)
+    {
+
+        var result = await _memberSerive.DetailsAsync(id, cancellation);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
