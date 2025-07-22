@@ -5,7 +5,7 @@ namespace Gym.Api.Contracts.Bookings;
 
 public record BookingResponse
     (
-    BookingStatus Status,
+    string Status,
     DateTime CreatedDate,
     ClassResponse Class
     );
