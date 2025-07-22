@@ -1,4 +1,5 @@
-﻿using Gym.Api.Abstractions;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Gym.Api.Abstractions;
 using Gym.Api.Contracts.Members;
 using Gym.Api.Errors;
 using Gym.Api.Persistence;
@@ -16,10 +17,20 @@ public class MemberSerive(ApplicationDbContext context) : IMemberSerive
        var member=await _context.Members
             .AsNoTracking()
             .Where(m=>m.UserId == userId)
-            .Include(m=>m.User)
-            .Include(m=>m.Bookings)
-            .ThenInclude(m=>m.Class)
-            .ThenInclude(m=>m.Trainer)
+            .ProjectToType<MemberResponse>()
+            .SingleOrDefaultAsync(cancellation);
+
+        if (member is null)
+            return Result.Failure<MemberResponse>(MemberErros.NotFound);
+
+        return Result.Success(member);
+    }
+
+    public async Task<Result<MemberResponse>> DetailsAsync(int id, CancellationToken cancellation = default)
+    {
+        var member = await _context.Members
+             .AsNoTracking()
+            .Where(m => m.Id == id)
             .ProjectToType<MemberResponse>()
             .SingleOrDefaultAsync(cancellation);
 
