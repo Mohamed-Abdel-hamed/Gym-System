@@ -36,13 +36,5 @@ public class MembershipsController(IMembershipService _membershipService) : Cont
     {
         return Ok("Error Subscribe");
     }
-    [Authorize(Roles = AppRoles.Staff)]
-    [HttpGet("alert-to-expiresmember")]
-    public async Task<IActionResult> AlertToExpiresMember([FromRoute] int planeId)
-    {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        RecurringJob.AddOrUpdate(() =>_membershipService.AlertToExpiresMember(userId, planeId), Cron.Yearly);
-        return Ok();
-    }
 
 }
