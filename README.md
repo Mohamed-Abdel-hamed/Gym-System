@@ -8,6 +8,10 @@
   <h1>🏋️‍♂️ Gym Management System</h1>
   <p>The system allows Admins to create subscription plans and assign memberships to members with defined limits. Trainers manage class sessions, while members can book sessions only if their membership is active and not frozen. Admins can freeze/unfreeze memberships, with automatic unfreeze handled by background jobs. The system includes booking validation, session limits, and automated reminders via Hangfire.</p>
 
+  <h3>🗺️ Entity Relationship Diagram (ERD)</h3>
+<img src="images/drawSQL-image-export-2025-07-23.png" alt="ERD Diagram" style="width:100%; max-width:900px;" />
+
+
   <h2>📦 Technologies & Packages</h2>
   <ul>
     <li><strong>.NET 9</strong> — Core framework</li>
