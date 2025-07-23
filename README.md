@@ -184,6 +184,18 @@
     <li>Dynamic filtering and searching</li>
     <li>Multi-field sorting (e.g., date, name, capacity)</li>
   </ul>
+<h3>⚙️ Performance & Security Enhancements</h3>
+
+<ul>
+  <li>
+    <strong>In-Memory Caching:</strong>
+    The application uses <code>IMemoryCache</code> to improve performance by caching frequently accessed data such as plans, settings, or role lists.
+  </li>
+  <li>
+    <strong>Rate Limiting:</strong>
+    Built-in rate limiting is applied to API endpoints to protect the system from abuse and ensure fair usage. This helps mitigate brute-force attacks and overuse.
+  </li>
+</ul>
 
   <h3>🔧 Health Check & Logging</h3>
   <ul>
