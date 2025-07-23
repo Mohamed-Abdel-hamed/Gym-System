@@ -45,7 +45,7 @@
     <li>Duration-based validation</li>
     <li>Pricing management</li>
   </ul>
-  <img src="images/planes.jpg" alt="Subscription Module" />
+  <img src="images/planes.jpg" alt="Subscription Module"  width="600"/>
 
   <h3>2️⃣ Member Module</h3>
   <p>Manages gym members and their subscriptions.</p>
@@ -55,7 +55,7 @@
     <li>Reset password and update profile</li>
     <li>Token-based login</li>
   </ul>
-  <img src="images/members.jpg" alt="Member Module" />
+  <img src="images/members.jpg" alt="Member Module" width="600" />
 
   <h3>3️⃣ Role Management</h3>
   <p>Assign and manage roles like Admin, Trainer, and Staff.</p>
@@ -64,7 +64,7 @@
     <li>Assign roles to users</li>
     <li>Used for authorization and UI access control</li>
   </ul>
-  <img src="images/roles.jpg" alt="Roles Module" />
+  <img src="images/roles.jpg" alt="Roles Module"  width="600"/>
 
   <h3>4️⃣ Auth Module</h3>
   <p>Authentication and user account management.</p>
@@ -75,7 +75,7 @@
     <li>Refresh tokens</li>
     <li>Token expiration handling</li>
   </ul>
-  <img src="images/Auths.jpg" alt="Auth Module" />
+  <img src="images/Auths.jpg" alt="Auth Module" width="600" />
 
   <h3>5️⃣ Trainer Module</h3>
   <p>Register, update, and assign trainers to sessions or programs.</p>
@@ -84,8 +84,8 @@
     <li>Update profile and schedule</li>
     <li>View assigned sessions</li>
   </ul>
-  <img src="images/trainers.jpg" alt="Trainer Module" />
-  <img src="images/trainer-info.jpg" alt="Trainer Details" />
+  <img src="images/trainers.jpg" alt="Trainer Module"  width="600"/>
+  <img src="images/trainer-info.jpg" alt="Trainer Details" width="700" />
 
   <h3>6️⃣ Class Session Module</h3>
   <p>Trainers or staff can create and manage gym class sessions.</p>
@@ -94,7 +94,7 @@
     <li>Show available classes for booking</li>
     <li>Filter by date, trainer, or availability</li>
   </ul>
-  <img src="images/classes.jpg" alt="Class Session Module" />
+  <img src="images/classes.jpg" alt="Class Session Module"  width="600"/>
 
   <h3>7️⃣ Booking Module</h3>
   <p>Members can book class sessions based on their subscription limits.</p>
@@ -105,8 +105,24 @@
     <li>Encrypted ID used in links</li>
     <li>Cancel or modify bookings (if session not started)</li>
   </ul>
-  <img src="images/bookings-1.jpg" alt="Booking Module" />
+  <img src="images/bookings-1.jpg" alt="Booking Module" width="600" />
+  <h3>💳 Stripe Integration</h3>
 
+<p>
+  The system integrates with <strong>Stripe</strong> to handle secure online payments.
+  Members can pay for subscriptions via Stripe Checkout.
+</p>
+
+<ul>
+  <li>Payment records store <code>SessionId</code>, <code>PaymentIntentId</code>, and <code>PaymentStatus</code></li>
+  <li>Each payment is linked to both the <strong>Member</strong> and their <strong>Membership</strong></li>
+</ul>
+
+<p>
+  Admins can review all payments and assign memberships upon successful payment confirmation.
+</p>
+
+ <img src="images/stripe.jpg" alt="Dashboard Module" width="600"/>
   <h3>8️⃣ Dashboard Module</h3>
   <p>Admin and staff can view summarized system statistics.</p>
   <ul>
@@ -116,8 +132,8 @@
     <li>Upcoming sessions</li>
     <li>Expiring memberships</li>
   </ul>
-  <img src="images/dashboards.jpg" alt="Dashboard Module" />
- <img src="images/memberships-per-day.jpg" alt="Dashboard Module" />
+  <img src="images/dashboards.jpg" alt="Dashboard Module"  width="600"/>
+ <img src="images/memberships-per-day.jpg" alt="Dashboard Module" width="600" />
   <h3>9️⃣ Background Tasks</h3>
   <p>Scheduled jobs using Hangfire for:</p>
   <ul>
@@ -125,8 +141,8 @@
     <li>Class session reminders to members</li>
     <li>Weekly trainer/session reports</li>
   </ul>
-  <img src="images/Jobs.jpg" alt="Background Tasks" />
-  <img src="images/curring jobs.jpg" alt="Recurring Jobs" />
+  <img src="images/Jobs.jpg" alt="Background Tasks" width="700"/>
+  <img src="images/curring jobs.jpg" alt="Recurring Jobs"width="700" />
 
   <h3>🔟 PDF & Excel Reports</h3>
   <p>Generate reports for auditing or exporting data.</p>
@@ -135,8 +151,8 @@
     <li>Session report with bookings</li>
     <li>Trainer assignments</li>
   </ul>
-  <img src="images/sheet-excel.jpg" alt="Reports Module" />
-  <img src="images/pdf.jpg" alt="Reports Module" />
+  <img src="images/sheet-excel.jpg" alt="Reports Module"  width="700"/>
+  <img src="images/pdf.jpg" alt="Reports Module"  width="700"/>
   <h3>9️⃣ Roles Management Module</h3>
 <p>Manages application roles used for access control and user permissions.</p>
 <ul>
