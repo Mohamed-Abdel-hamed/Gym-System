@@ -29,17 +29,17 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         if (membership is null) 
             return Result.Failure(MembershipErrors.NotFound);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
 
         if (membership.Status!=MembershipStatus.Active)
             return Result.Failure(MembershipErrors.NotActive);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
         
         if (membership.Plan.MaxFreezeDays == 0)
             return Result.Failure(MembershipFreezeErrors.NotExistsFreeze);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
 
         var now = DateTime.Now;
 
@@ -51,7 +51,7 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         if (TotalDays < membership.Plan.MaxFreezeDays)
             return Result.Failure(MembershipFreezeErrors.NotAllowedFreeze);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
         ///
         // If the member paid for 2 periods (AutoRenewPaid == true),
         // we only allow freezing in the first half of the duration.
@@ -68,7 +68,7 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
         if (membershipTotalDays < 365)
             return Result.Failure(MembershipErrors.LimitDuration);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
         ///
 
         var currentFreeze = membership.Freezes
@@ -106,23 +106,22 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
 
         if (member is null)
             return Result.Failure(UserErrors.UserNotFound);
-        /////////////////////////////////////////////////////////////
+        
 
         var membership = await _context.Memberships
             .Include(m=>m.Freezes)
             .SingleOrDefaultAsync(x => x.MemberId == member.Id && x.Id == membershipId, cancellation);
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
 
         if (membership is null)
             return Result.Failure(MembershipErrors.NotFound);
-        ///////////////////////////////////////////////////////////////////////////////////////////
+        
 
         if (membership.Status != MembershipStatus.Freeze)
             return Result.Failure(MembershipErrors.NotFreeze);
 
         var now = DateTime.Now;
 
-        // var tomorrow = DateTime.Now.Date.AddDays(1);
         var currentFreeze = membership.Freezes
              .Where(f => f.EndDate >= membership.StartDate &&
              f.StartDate <= membership.EndDate &&
@@ -147,11 +146,6 @@ public class MembershipFreezeService(ApplicationDbContext context) : IMembership
             OrderByDescending(ms=>ms.EndDate)
             .Last().EndDate<=DateTime.Today)
             .ToListAsync();
-
-        //foreach ( var membership in memberships)
-        //{
-        //    Console.WriteLine($"{membership.Id} - {membership.Freezes.First().Id} - {membership.Freezes.First().EndDate}");
-        //}
 
         memberships.ForEach(ms =>
         {
